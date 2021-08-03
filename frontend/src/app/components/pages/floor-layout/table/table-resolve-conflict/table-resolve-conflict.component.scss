@@ -1,0 +1,46 @@
+.alert-success .btn-success {
+    float: right;
+  }
+  
+  .alert-success span {
+    line-height: 34px;
+  }
+  
+  .alert-success > div:after {
+    clear: both;
+    content: '';
+    display: table;
+  }
+
+  $active-focused: 87%;
+$active-unfocused: 54%;
+$inactive: 38%;
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+table {
+  text-align: center;
+
+  button {
+    opacity: $active-unfocused;
+  
+    &.inactive {
+      opacity: $inactive;
+    }
+  
+    &:hover {
+      opacity: $active-focused;
+      transform: scale(1.35);
+    }
+  }
+}
+
+
+
+.inactive {
+  font-style: italic;
+  opacity: $inactive;
+}

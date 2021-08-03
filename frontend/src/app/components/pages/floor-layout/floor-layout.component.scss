@@ -1,0 +1,20 @@
+$active-focused: 87%;
+$active-unfocused: 54%;
+$inactive: 38%;
+
+span button {
+  opacity: $active-unfocused;
+  &.inactive {
+    opacity: $inactive;
+  }
+
+  &:hover {
+    opacity: $active-focused;
+    transform: scale(1.35);
+  }
+}
+
+.unsaved {
+  color: red;
+  font-size: 12pt;
+}

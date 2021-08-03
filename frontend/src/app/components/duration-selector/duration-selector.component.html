@@ -1,0 +1,8 @@
+<ng-template #t let-fill="fill">
+    <span class="star" [class.full]="fill === 100">
+    &#9673;
+    </span>
+</ng-template>
+<ngb-rating [(rate)]="selectedDurationInHours" (rateChange)="onTimeChanged()" [starTemplate]="t"
+            [max]="12"></ngb-rating>
+<pre class="text-white"><b>{{selectedDurationInHours}}</b> hours, Ends at: <b>{{fullTime}}</b></pre>

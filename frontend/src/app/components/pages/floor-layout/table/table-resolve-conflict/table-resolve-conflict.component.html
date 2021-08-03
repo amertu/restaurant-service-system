@@ -1,0 +1,53 @@
+<div class="container mt-3">
+    <div *ngIf="dataLoaded" class="card">
+      <div class="card-header bg-light">
+        <h5>Resolve conflicts before {{delete? 'deleting' : 'deactivating'}} table {{table.tableNum}}:</h5>
+      </div>
+      <div *ngIf="reservations.length > 0" class="card-body table-responsive">
+        <div class="alert alert-info" role="alert">
+            There {{reservations.length == 1 ? 'is' : 'are'}} {{reservations.length}} conflicting reservation{{reservations.length == 1 ? '' : 's'}} left.<br/>
+            Resolve all conflicts first, after that the table can be {{delete ? 'deleted' : 'deactivated'}} safely.
+        </div>
+        <table class="table table-hover table-sm table-bordered">
+          <thead>
+          <th scope="col">Name</th>
+          <th scope="col">Start Time</th>
+          <th scope="col">End Time</th>
+          <th scope="col">Tables</th>
+          <th scope="col">Edit</th>
+          <th scope="col">Delete</th>
+          </thead>
+          <tbody>
+          <tr *ngFor="let reservation of reservations">
+            <td>{{reservation.guestName}}</td>
+            <td>{{formatDate(reservation.startDateTime)}}</td>
+            <td>{{formatDate(reservation.endDateTime)}}</td>
+            <td>
+              <span *ngFor="let table of reservation.restaurantTables; last as isLast">
+              <span *ngIf="!isLast">{{table.tableNum}}, </span>
+              <span *ngIf="isLast">{{table.tableNum}}</span>
+              </span>
+            </td>
+            <td><button class="btn btn-block fas fa-edit" (click)="openEditReservation(reservation)"></button> <!-- data-toggle="modal" data-target=".editModal"></button></td>-->
+            <td><button class="btn fas fa-trash" (click)="openDeleteReservation(reservation)"></button></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="reservations.length == 0" class="card-body">
+        <div *ngIf="desiredActionComplete" class="alert alert-success">
+            <div>
+                <span>Successfully {{delete ? 'deleted' : 'deactivated'}} the table!</span>
+                <p class="btn btn-success" routerLink="/floorplan">Back to floorplan</p>
+            </div>
+        </div>
+        <div *ngIf="!desiredActionComplete">
+          <p>All set! you may now {{delete ? 'delete' : 'deactivate'}} the table.</p>
+          <button type="button" class="btn btn-primary" (click)="completeDesiredAction()">
+            {{delete ? 'Delete' : 'Deactivate'}}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -1,0 +1,47 @@
+<app-reservation-add></app-reservation-add>
+
+<app-reservation-details *ngIf="selectedReservation" [reservation]="selectedReservation"></app-reservation-details>
+
+<app-reservation-edit *ngIf="selectedReservation" [reservation]="selectedReservation"></app-reservation-edit>
+
+<app-reservation-delete *ngIf="selectedReservation" [reservation]="selectedReservation"></app-reservation-delete>
+
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header bg-light">
+      <h5>Reservations:</h5>
+      <button class="btn fas fa-plus" data-toggle="modal" data-target=".addModal"></button>
+    </div>
+    <div class="card-body table-responsive">
+      <table class="table table-hover table-sm table-bordered">
+        <thead>
+        <th scope="col">Name</th>
+        <th scope="col">Number of Guests</th>
+        <th scope="col">Start Time</th>
+        <th scope="col">End Time</th>
+        <th scope="col">Tables</th>
+        <!--<th scope="col">Details</th>-->
+        <th scope="col">Edit</th>
+        <th scope="col">Delete</th>
+        </thead>
+        <tbody>
+        <tr *ngFor="let reservation of reservations">
+          <td>{{reservation.guestName}}</td>
+          <td>{{reservation.numberOfGuests}}</td>
+          <td>{{formatDate(reservation.startDateTime)}}</td>
+          <td>{{formatDate(reservation.endDateTime)}}</td>
+          <td>
+            <span *ngFor="let table of reservation.restaurantTables; last as isLast">
+            <span *ngIf="!isLast">{{table.tableNum}}, </span>
+            <span *ngIf="isLast">{{table.tableNum}}</span>
+            </span>
+          </td>
+          <!--<td><button class="btn btn-block fas fa-info-circle" (click)="selectReservation(reservation)" data-toggle="modal" data-target=".detailsModal"></button></td> -->
+          <td><button class="btn btn-block fas fa-edit" (click)="selectReservation(reservation)" data-toggle="modal" data-target=".editModal"></button></td>
+          <td><button class="btn fas fa-trash" (click)="selectReservation(reservation)" data-toggle="modal" data-target=".deleteModal"></button></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

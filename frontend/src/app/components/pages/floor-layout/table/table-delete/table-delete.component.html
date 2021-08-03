@@ -1,0 +1,49 @@
+<div class="modal-header">
+  <h5 class="modal-title">Delete table</h5>
+  <button type="button" class="close btn" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body bg-dark text-white table-responsive">
+  <p>Are you sure you want to delete table {{table.tableNum}} ({{table.posDescription}})?</p>
+  <div *ngIf="this.reservations.length > 0" class="alert alert-danger fade show" role="alert">
+    There {{reservations.length == 1 ? 'is' : 'are'}} {{reservations.length}}
+    reservation{{reservations.length > 1 ? 's' : ''}}
+    for this table in the future.<br />
+    Deleting it now will also delete ALL reservations associated with it.
+  </div>
+  <div *ngIf="this.reservations.length > 0" class="alert alert-info fade show" role="alert">
+    You can resolve the conflicts before deletion by clicking the button below.
+  </div>
+  <table *ngIf="this.reservations.length > 0" class="table table-bordered bg-dark text-white">
+    <thead>
+      <th scope="col">Name</th>
+      <th scope="col">Start Time</th>
+      <th scope="col">End Time</th>
+      <th scope="col">Tables</th>
+    </thead>
+    <tbody>
+      <tr *ngFor="let reservation of reservations">
+        <td>{{reservation.guestName}}</td>
+        <td>{{formatDate(reservation.startDateTime)}}</td>
+        <td>{{formatDate(reservation.endDateTime)}}</td>
+        <td>
+          <span *ngFor="let table of reservation.restaurantTables; last as isLast">
+            <span *ngIf="!isLast">{{table.tableNum}}, </span>
+            <span *ngIf="isLast">{{table.tableNum}}</span>
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="modal-footer bg-dark text-white">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('Cancel click')">Cancel</button>
+  <button *ngIf="reservations.length > 0" type="button" class="btn btn-primary" (click) = "activeModal.dismiss('Resolve conflicts click')"
+    routerLink="table/{{table.id}}/resolve-delete">
+    Resolve conflicts
+  </button>
+  <button type="button" class="btn btn-danger" (click)="deleteTable(table.id)"
+    data-dismiss="modal">Delete{{reservations.length > 0? ' everything' : ''}}
+  </button>
+</div>

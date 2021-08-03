@@ -1,0 +1,32 @@
+<app-dish-add></app-dish-add>
+
+<app-dish-edit *ngIf="selectedDish" [dish]="selectedDish"></app-dish-edit>
+
+<app-dish-delete *ngIf="selectedDish" [dish]="selectedDish"></app-dish-delete>
+
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header bg-light">
+      <h5>Dishes:</h5>
+      <button class="btn fas fa-plus" data-toggle="modal" data-target=".addModal"></button>
+    </div>
+    <div class="card-body table-responsive">
+      <table class="table table-hover table-sm table-bordered">
+        <thead>
+        <th scope="col">Name</th>
+        <th scope="col">Price</th>
+        <th scope="col">Edit</th>
+        <th scope="col">Delete</th>
+        </thead>
+        <tbody>
+        <tr *ngFor="let dish of dishes">
+          <td>{{dish.name}}</td>
+          <td>{{formatPrice(dish.price)}}</td>
+          <td><button class="btn btn-block fas fa-edit" (click)="selectDish(dish)" data-toggle="modal" data-target=".editModal"></button></td>
+          <td><button class="btn fas fa-trash" (click)="selectDish(dish)" data-toggle="modal" data-target=".deleteModal"></button></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

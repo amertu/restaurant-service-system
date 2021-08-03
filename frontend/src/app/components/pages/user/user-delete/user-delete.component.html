@@ -1,0 +1,13 @@
+<div class="modal-header">
+  <h5 class="modal-title">Delete user</h5>
+  <button type="button" class="close btn" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body bg-dark text-white">
+  <p>Do you want to delete user {{user.firstName}} {{user.lastName}}?</p>
+</div>
+<div class="modal-footer bg-dark text-white">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('Cancel click')">Cancel</button>
+  <button type="button" class="btn btn-danger" (click)="deleteUser(user)" data-dismiss="modal">Delete</button>
+</div>

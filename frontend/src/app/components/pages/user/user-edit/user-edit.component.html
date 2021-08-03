@@ -1,0 +1,51 @@
+<div class="modal-header">
+  <h5 class="modal-title">Edit user</h5>
+  <button type="button" class="close btn" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body bg-dark text-white">
+  <form (keyup.enter)="onSubmitUpdate()" class="form" [formGroup]="editForm">
+    <div class="form-group">
+      <label for="firstName">First Name*</label>
+      <input type="text" name="firstName" formControlName="firstName" class="form-control" id="firstName"
+        placeholder="First Name">
+      <div *ngIf="submitted && editForm.controls.firstName.errors" class="error">
+        <small class="form-text text-warning" *ngIf="editForm.controls.firstName.errors.required">
+          First Name is required!
+        </small>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="lastName">Last Name*</label>
+      <input type="text" name="lastName" formControlName="lastName" class="form-control" id="lastName"
+        placeholder="Last Name">
+      <div *ngIf="submitted && editForm.controls.lastName.errors" class="error">
+        <small class="form-text text-warning" *ngIf="editForm.controls.lastName.errors.required">
+          Last Name is required!
+        </small>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="lastName">Social Security Number*</label>
+      <input type="text" name="ssnr" readonly formControlName="ssnr" class="form-control" id="ssnr"
+              placeholder="Social Security Number">
+    </div>
+    <div class="form-group">
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input form-control" id="admin-edit" value="true" name="admin"
+          formControlName="admin">
+        <label class="custom-control-label" for="admin-edit">Admin</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="email">Email*</label>
+      <input type="text" name="email" readonly formControlName="email" class="form-control" id="email"
+        aria-describedby="usernameHelp" placeholder="Email" email="true">
+    </div>
+  </form>
+</div>
+<div class="modal-footer bg-dark text-white">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('Cancel click')" #closeBtn>Cancel</button>
+  <button type="button" class="btn btn-success float-right" (click)="onSubmitUpdate()">Edit</button>
+</div>

@@ -1,0 +1,62 @@
+<div class="modal fade editModal" tabindex="-1" role="dialog" aria-labelledby="Create message modal"
+     aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit dish</h5>
+        <button type="button" class="close btn" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body bg-dark text-white">
+        <form (keyup.enter)="onSubmitUpdate()" class="form" [formGroup]="dishForm">
+          <div class="form-group">
+            <label for="name">Name*</label>
+            <input type="text" class="form-control" id="name" formControlName="name"
+                   placeholder="Name">
+            <div *ngIf="submitted && dishForm.controls.name.errors" class="error">
+              <small class="form-text text-warning" *ngIf="dishForm.controls.name.errors.required">
+                Name is required!
+              </small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="price">Price*</label>
+            <div class="input-group">
+              <input type="number" class="form-control" id="price" formControlName="price" min="0.00" step="0.01"
+                     placeholder="Price">
+              <div class="input-group-append">
+                <span class="input-group-text">€</span>
+              </div>
+            </div>
+            <div *ngIf="submitted && dishForm.controls.price.errors" class="error">
+              <small class="form-text text-warning" *ngIf="dishForm.controls.price.errors.required">
+                Price has to be a number with max. two decimal digits!
+              </small>
+              <small class="form-text text-warning" *ngIf="dishForm.controls.price.errors.min">
+                Price has to be at least 0!
+              </small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="name">Category*</label>
+            <select type="" class="form-control" id="category" formControlName="category"
+                    placeholder="Category">
+              <option value="FOOD"> Food</option>
+              <option value="DRINK"> Drink</option>
+            </select>
+            <div *ngIf="submitted && dishForm.controls.category.errors" class="error">
+              <small class="form-text text-warning" *ngIf="dishForm.controls.category.errors.required">The category
+                is required!
+              </small>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer bg-dark text-white">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" #closeBtn>Cancel</button>
+        <button type="button" class="btn btn-success float-right" (click)="onSubmitUpdate()">Edit</button>
+      </div>
+    </div>
+  </div>
+</div>

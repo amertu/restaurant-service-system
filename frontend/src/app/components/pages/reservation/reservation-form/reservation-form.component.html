@@ -1,0 +1,152 @@
+
+    <div class="modal-header">
+      <h5  *ngIf="type !== 'Details'" class="modal-title">{{type}} reservation</h5>
+      <h5  *ngIf="type === 'Details'" class="modal-title">Reservation Details</h5>
+      <button type="button" class="close btn" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body bg-dark text-white">
+      <form (keyup.enter)="onSubmit()" class="form" [formGroup]="reservationForm">
+          <div *ngIf="type === 'Add'" class="form-group">
+          <div>
+            <button type="button" class="btn btn-warning" (click)="fillFormForWalkInCustomer()"> 
+              <i class="fas fa-walking"></i>
+              Walk-in customer</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="guestName">Guest name*</label>
+          <input type="text" class="form-control" id="guestName" formControlName="guestName"
+                 placeholder="Guest name">
+          <div *ngIf="submitted && reservationForm.controls.guestName.errors" class="error">
+            <small class="form-text text-warning" *ngIf="reservationForm.controls.guestName.errors.required">Guest
+              name is required!
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="numberOfGuests">Number of guests*</label>
+          <input type="number" class="form-control" id="numberOfGuests" (input)="onNumberOfGuestsInput()" formControlName="numberOfGuests"  min="1"
+                 placeholder="Number of guests.">
+                 <div *ngIf="submitted && reservationForm.controls.numberOfGuests.errors" class="error">
+                  <small class="form-text text-warning" *ngIf="reservationForm.controls.numberOfGuests.errors.required">The
+                    number of guests is
+                    required. This field must contain a number.
+                  </small>
+                  <small class="form-text text-warning" *ngIf="reservationForm.controls.numberOfGuests.errors.min">The
+                    number of guests has to be at least 1!
+                  </small>
+                </div>
+        </div>
+        <div class="form-group">
+          <label for="contactInformation">Contact Information</label>
+          <input type="text" class="form-control" id="contactInformation" formControlName="contactInformation"
+                 placeholder="Contact information (e.g. telephone number or e-mail address of the guest).">
+        </div>
+        <div class="form-group">
+          <label for="comment">Comment</label>
+          <input type="text" class="form-control" id="comment" formControlName="comment"
+                 placeholder="Comment concerning the reservation.">
+        </div>
+        <div class="form-group">
+          <label>Date*</label>
+          <app-date-selector
+            (submitNewDate)="onDateChanged($event)"
+            [initialDateAsString]="reservationForm.controls.dateAsString.value"
+          ></app-date-selector>
+          <div *ngIf="submitted && isDateInPast()" class="error">
+            <small class="form-text text-warning" >Date and start time have to be in the future!
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+            <div class="container">
+                <div class="row">
+                  <div class="col-sm">
+                      <label>Start Time*</label>
+                      <app-time-selector
+                        (submitNewTime)="onStartTimeChanged($event)"
+                        [initialHour]="reservationForm.controls.startTime.value.substring(0,2)"
+                        [initialMinute]="reservationForm.controls.startTime.value.substring(3,5)"
+                      ></app-time-selector>
+                  </div>
+                  <div class="col-sm">
+                      <label>End Time*</label>
+                      <app-time-selector *ngIf="!dirtiedEndTime"
+                        (submitNewTime)="onEndTimeChanged($event)"
+                        [initialHour]="lastValidEndTime.substring(0,2)"
+                        [initialMinute]="lastValidEndTime.substring(3,5)"
+                      ></app-time-selector>
+                  </div>
+                </div>
+              </div>
+
+        </div>
+        <!-- // It was decided to currently use an "End Time"-Spinner instead of the Duration selector. 
+
+        <div class="form-group">
+          <label>Duration in hours*</label>
+          <app-duration-selector
+            (submitNewTime)="onEndTimeChanged($event)"
+            [initialHour]="reservationForm.controls.startTime.value.substring(0,2)"
+            [initialMinute]="reservationForm.controls.startTime.value.substring(3,5)"
+            [initialEndHour]="reservationForm.controls.endTime.value.substring(0,2)"
+          ></app-duration-selector>
+        </div>
+        -->
+        <hr>
+        <div class="form-group">
+        <button type="button" class="btn btn-success"  [disabled]="!reservationForm.controls.numberOfGuests.value" (click)="getTableSuggestion()"> <i class="fas fa-search"></i> Find tables</button>
+        <div *ngIf="!reservationForm.controls.numberOfGuests.value" class="error">
+          <small class="form-text text-warning" *ngIf="reservationForm.controls.numberOfGuests.errors.required">To enable this button, please provide a number of guests.
+          </small>
+        </div>
+        </div>
+        <hr>
+        <div class="form-group table-responsive" id="table-container">
+          <label>Tables*</label>
+          <small class="form-text text-warning" >Currently selected: {{getStringForSelectedTables()}}</small>
+          <div class="canvasContainer">
+            <canvas id="canvas-reservation"></canvas>
+          </div>
+          <!--
+          <table class="table table-dark table-hover table-sm table-bordered" id="checkedTables">
+            <thead>
+            <th scope="col">Selected</th>
+            <th scope="col">Table Number</th>
+            <th scope="col">Number of Seats</th>
+            <th scope="col">Position Description</th>
+            </thead>
+            <tbody>
+            <tr *ngFor="let table of tables; let i = index" [ngStyle]="{ backgroundColor: tableColors[i] }">
+              <td>
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" (click)="setCheck(i)" [checked]="checkedTables[i]" id="{{'table' + type + i}}">
+                  <label class="custom-control-label" for="{{'table' + type + i}}"></label>
+                </div>
+              </td>
+              <td>{{ table.tableNum }}</td>
+              <td>{{ table.seatCount }}</td>
+              <td>{{ table.posDescription }}</td>
+            </tr>
+            </tbody>
+          </table>-->
+          <div *ngIf="submitted && (!tableSelection || tableSelection.length < 1)" class="error">
+            <small class="form-text text-warning">At least 1 selected table is required!</small>
+          </div>
+          <!--<div *ngIf="submitted && nothingChecked()" class="error">
+            <small class="form-text text-warning">At least 1 selected table is required!
+            </small>
+          </div>
+          <div *ngIf="submitted && !nothingChecked() && invalidChecked()" class="error">
+            <small class="form-text text-warning">At least 1 selected table is not available!
+            </small>
+          </div>-->
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer bg-dark text-white">
+      <button type="button" class="btn btn-secondary" (click)="activeModal.close('Cancel click')" #closeBtn>Cancel</button>
+      <button *ngIf="type !== 'Details'" type="button" class="btn btn-success float-right" (click)="onSubmit()">{{ type }}</button>
+    </div>

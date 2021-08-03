@@ -1,0 +1,97 @@
+<div class="modal-header">
+  <h5 class="modal-title">Add user</h5>
+  <button type="button" class="close btn" (click)="activeModal.dismiss('Cross click')" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body bg-dark text-white">
+  <form (keyup.enter)="onSubmitAdd()" class="form" [formGroup]="addForm">
+    <div class="form-group">
+      <label for="firstName">First Name*</label>
+      <input type="text" name="firstName" formControlName="firstName" class="form-control" id="firstName"
+        placeholder="First Name">
+      <div *ngIf="submitted && addForm.controls.firstName.errors" class="error">
+        <small class="form-text text-warning" *ngIf="addForm.controls.firstName.errors.required">
+          First Name is required!
+        </small>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="lastName">Last Name*</label>
+      <input type="text" name="lastName" formControlName="lastName" class="form-control" id="lastName"
+        placeholder="Last Name">
+      <div *ngIf="submitted && addForm.controls.lastName.errors" class="error">
+        <small class="form-text text-warning" *ngIf="addForm.controls.lastName.errors.required">
+          Last Name is required!
+        </small>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="lastName">Social Security Number*</label>
+      <input type="text" name="ssnr" formControlName="ssnr" class="form-control"
+             id="ssnr"
+             placeholder="Social Security Number">
+      <div *ngIf="submitted && addForm.controls.ssnr.errors" class="error">
+        <small class="form-text text-warning" *ngIf="addForm.controls.ssnr.errors.required">
+          Social security number is required!
+        </small>
+        <small class="form-text text-warning" *ngIf="addForm.controls.ssnr.errors.pattern">
+          Social security number has to be exactly 10 digits!
+        </small>
+        <small class="form-text text-warning" *ngIf="addForm.controls.ssnr.errors.invalidSSNR">
+          Social security number has to be valid in austria!
+        </small>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input form-control" id="admin-add" value="true" name="admin"
+          formControlName="admin">
+        <label class="custom-control-label" for="admin-add">Admin</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="email">Email*</label>
+      <input type="text" name="email" formControlName="email" class="form-control" id="email"
+        aria-describedby="usernameHelp" placeholder="Email" email="true">
+      <div *ngIf="submitted && addForm.controls.email.errors" class="error">
+        <small class="form-text text-warning" *ngIf="addForm.controls.email.errors.required">
+          Email is required!
+        </small>
+        <small class="form-text text-warning" *ngIf="addForm.controls.email.errors.pattern">
+          Given email is not valid!
+        </small>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="password">Password*</label>
+      <input type="password" name="password" formControlName="password" class="form-control" id="password"
+        placeholder="Password">
+      <div *ngIf="submitted && addForm.controls.password.errors" class="error">
+        <small class="form-text text-warning" *ngIf="addForm.controls.password.errors.required">
+          Password is required!
+        </small>
+        <small class="form-text text-warning" *ngIf="addForm.controls.password.errors.minlength">
+          Password must be at least 8 characters long!
+        </small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="repeatPassword">Repeat Password*</label>
+      <input type="password" name="repeatPassword" formControlName="repeatPassword" class="form-control"
+        id="repeatPassword" placeholder="Repeat Password">
+      <div *ngIf="submitted && addForm.controls.repeatPassword.errors" class="error">
+        <small class="form-text text-warning" *ngIf="addForm.controls.repeatPassword.errors.required">
+          Please repeat the password!
+        </small>
+        <small class="form-text text-warning" *ngIf="addForm.controls.repeatPassword.errors.notSame">
+          Passwords must match!
+        </small>
+      </div>
+    </div>
+  </form>
+  <div class="modal-footer bg-dark text-white">
+    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('Cancel click')" #closeBtn>Cancel</button>
+    <button type="button" class="btn btn-success float-right" (click)="onSubmitAdd()">Add</button>
+  </div>

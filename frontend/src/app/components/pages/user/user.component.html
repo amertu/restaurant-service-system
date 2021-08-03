@@ -1,0 +1,37 @@
+<div *ngIf="authService.isLoggedIn() && this.authService.isAdmin()" class="container mt-3">
+  <div class="card">
+    <div class="card-header bg-light">
+      <h5>User:</h5>
+      <button class="btn fas fa-plus" (click)="onClickAddUser()"></button>
+    </div>
+    <div class="card-body table-responsive">
+      <table class="table table-hover table-sm table-bordered ">
+        <thead>
+        <th scope="col">Surname</th>
+        <th scope="col">Last Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Social Security Number</th>
+        <th scope="col">Status</th>
+        <th scope="col">Reset PW</th>
+        <th scope="col">Edit</th>
+        <th scope="col">Delete</th>
+        </thead>
+        <tbody>
+        <tr *ngFor="let user of users">
+          <td class="{{user.blocked ? 'disabled' : ''}}"><i *ngIf="user.admin" class="fas fa-crown"></i> {{user.firstName}}</td>
+          <td class="{{user.blocked ? 'disabled' : ''}}">{{user.lastName}}</td>
+          <td class="{{user.blocked ? 'disabled' : ''}}">{{user.email}}</td>
+          <td class="{{user.blocked ? 'disabled' : ''}}">{{user.ssnr}}</td>
+          <td>
+            <button *ngIf="!user.blocked" class="btn fas fa-unlock" (click)="onClickBlockButton(user, true)"></button>
+            <button *ngIf="user.blocked" class="btn fas fa-lock inactive" (click)="onClickBlockButton(user, false)"></button>
+          </td>
+          <td><button class="btn fas fa-key" (click)="onClickResetPassword(user)"></button></td>
+          <td><button class="btn fas fa-edit" (click)="onClickEditUser(user)"></button></td>
+          <td><button class="btn fas fa-trash" (click)="onClickDeleteUser(user)"></button></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

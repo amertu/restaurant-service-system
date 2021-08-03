@@ -1,0 +1,10 @@
+<div class="form-group">
+  <div class="input-group">
+    <input class="form-control" [readonly]="true" [startDate]="initialDate" (dateSelect)="onDateChanged($event)"
+           name="dp" [(ngModel)]="model" ngbDatepicker #d="ngbDatepicker">
+    <div class="input-group-append">
+      <button class="btn btn-outline-secondary fas fa-calendar-alt" (click)="d.toggle()" type="button"></button>
+    </div>
+  </div>
+</div>
+

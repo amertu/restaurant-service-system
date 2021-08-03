@@ -1,0 +1,52 @@
+<div class="modal-header">
+  <h5 class="modal-title">Add table</h5>
+  <button type="button" class="close btn" data-dismiss="modal" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body bg-dark text-white">
+  <form (keyup.enter)="onSubmitAdd()" class="form" [formGroup]="tableForm">
+    <div class="form-group">
+      <label for="tableNum">Table number*</label>
+      <input type="number" class="form-control" id="tableNum" formControlName="tableNum" min="1"
+        placeholder="Table number">
+      <div *ngIf="submitted && tableForm.controls.tableNum.errors" class="error">
+        <small class="form-text text-warning" *ngIf="tableForm.controls.tableNum.errors.required">The table
+          number is
+          required!
+        </small>
+        <small class="form-text text-warning" *ngIf="tableForm.controls.tableNum.errors.min">The table
+          number has to be at least 1!
+        </small>
+      </div>
+      <div *ngIf="submitted && tableNumOverlapping()" class="error">
+        <small class="form-text text-warning">The table
+          number already exists!
+        </small>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="seatCount">Number of seats*</label>
+      <input type="number" class="form-control" id="seatCount" formControlName="seatCount" min="1"
+        placeholder="Number of seats">
+      <div *ngIf="submitted && tableForm.controls.seatCount.errors" class="error">
+        <small class="form-text text-warning" *ngIf="tableForm.controls.seatCount.errors.required">The seat
+          count is
+          required!
+        </small>
+        <small class="form-text text-warning" *ngIf="tableForm.controls.seatCount.errors.min">The seat
+          count has to be at least 1!
+        </small>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="posDescription">Position description</label>
+      <input type="text" class="form-control" id="posDescription" formControlName="posDescription"
+        placeholder="Position description">
+    </div>
+  </form>
+</div>
+<div class="modal-footer bg-dark text-white">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('Cancel click')" #closeBtn>Cancel</button>
+  <button type="button" class="btn btn-success float-right" (click)="onSubmitAdd()">Add</button>
+</div>

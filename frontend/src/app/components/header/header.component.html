@@ -1,0 +1,39 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+  <a class="navbar-brand ml-lg-5 btn" href="">
+    <i class="fas fa-leaf fa-flip-horizontal"></i> Spring Kitchen</a>
+  <button class="navbar-toggler ml-5" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link btn" *ngIf="authService.isLoggedIn()" routerLink="/reservation" routerLinkActive="active">
+          <i class="far fa-calendar-alt"></i> Reservations</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link btn" *ngIf="authService.isLoggedIn()" routerLink="/billing" routerLinkActive="active">
+          <i class="fas fa-receipt"></i> Billing</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link btn" *ngIf="authService.isLoggedIn()" routerLink="/floorplan" routerLinkActive="active">
+          <i class="fas fa-home"></i> Floorplan</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link btn" *ngIf="authService.isLoggedIn() && authService.isAdmin()" routerLink="/users" routerLinkActive="active">
+          <i class="fas fa-id-card"></i> Users</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link btn" *ngIf="authService.isLoggedIn()" routerLink="/message" routerLinkActive="active">
+          <i class="fas fa-bullhorn"></i> Announcements</a>
+      </li>
+    </ul>
+    <ul class="navbar-nav ml-5 mr-5">
+      <a class="nav-link btn" *ngIf="!authService.isLoggedIn()" routerLink="/login" routerLinkActive="active">
+        <i class="fas fa-sign-in-alt"></i> Login</a>
+      <a class="nav-link btn" *ngIf="authService.isLoggedIn()" routerLink="/" (click)="authService.logoutUser()">
+        <i class="fas fa-sign-out-alt"></i> Logout</a>
+    </ul>
+  </div>
+</nav>

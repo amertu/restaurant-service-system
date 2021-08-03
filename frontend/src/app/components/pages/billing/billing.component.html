@@ -1,0 +1,38 @@
+<div class="container mt-3">
+  <div class="card">
+    <span class="btn btn-dark" routerLink="/dish" routerLinkActive="active">
+      <i class="fas fa-concierge-bell"></i> Dishes</span>
+  </div>
+</div>
+
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header bg-light">
+      <h5>Bills:</h5>
+      <button class="btn fas fa-plus" data-toggle="modal" (click)="openAddBill()"></button>
+    </div>
+    <div class="card-body table-responsive">
+      <table class="table table-hover table-sm table-bordered">
+        <thead>
+        <th scope="col">Invoice Nr.</th>
+        <th scope="col">Date</th>
+        <th scope="col">Tables</th>
+        <th scope="col">Total cost</th>
+        <th scope="col">Details</th>
+
+        </thead>
+        <tbody>
+        <tr *ngFor="let bill of bills">
+          <td >{{bill.invoiceId}}</td>
+          <td >{{bill.paidAt | date:'MMM d, y, h:mm'}}</td>
+          <td >{{bill.servedTables}}</td>
+          <td >{{formatPrice(bill.totalCost)}}</td>
+          <td >
+            <button class="btn fas fa-file-invoice" (click)="getInvoicePDF(bill.invoiceId)"> </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

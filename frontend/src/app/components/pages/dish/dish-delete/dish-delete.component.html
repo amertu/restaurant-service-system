@@ -1,0 +1,20 @@
+<div class="modal fade deleteModal" tabindex="-1" role="dialog" aria-labelledby="Create message modal"
+     aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete dish</h5>
+        <button type="button" class="close btn" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body bg-dark text-white">
+        <p>Do you want to delete dish {{dish.name}}?</p>
+      </div>
+      <div class="modal-footer bg-dark text-white">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="deleteDish(dish)" data-dismiss="modal">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

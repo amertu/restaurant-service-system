@@ -1,0 +1,33 @@
+$active-focused: 87%;
+$active-unfocused: 54%;
+$inactive: 38%;
+
+.view-filter[aria-expanded="false"]:before {
+  content:"View Filter";
+}
+
+.view-filter[aria-expanded="true"]:before {
+  content:"Hide Filter";
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+table {
+  text-align: center;
+}
+
+.nav-btn {
+  opacity: $active-unfocused;
+
+&.inactive {
+   opacity: $inactive;
+ }
+
+&:hover {
+   opacity: $active-focused;
+   transform: scale(1.35);
+ }
+}

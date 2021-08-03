@@ -1,0 +1,11 @@
+<div class="jumbotron mt-5">
+  <h1 class="display-4">Welcome to the Spring Kitchen!</h1>
+  <hr class="my-4">
+  <a *ngIf="!authService.isLoggedIn()" class="btn btn-primary btn-lg" routerLink="/login" role="button">Login</a>
+  <div *ngIf="authService.isLoggedIn()">
+    <p>Check out the latest announcement.</p>
+    <p class="lead">
+      <a class="btn btn-primary btn-lg" routerLink="/message" role="button">Announcement</a>
+    </p>
+  </div>
+</div>

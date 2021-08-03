@@ -1,0 +1,115 @@
+
+<h3 *ngIf="noLayout" style="color: red">There is no layout saved in the database! Go to Floorplan first and save a layout.</h3>
+<div *ngIf="!noLayout">
+<div>
+  <h2>{{startDate | date:'longDate'}} {{currentTime | date:'HH:mm:ss'}}</h2>
+  <h3>{{displayMSG}} at {{startTime}} - {{endTime}}</h3>
+  <h4>{{guestName}}</h4>
+  <h4>{{tableNr}}</h4>
+
+  <div class="canvasContainer">
+    <canvas id="canvas"></canvas>
+  </div>
+</div>
+
+
+
+<div id="filter-container" class="container mt-3 collapse">
+  <div class="card">
+    <div class="card-header bg-light">
+      <h5>Filter Reservations:</h5>
+    </div>
+    <div class="card-body">
+
+      <div class="form-group">
+        <label for="guest-search-box">Guest name</label>
+        <input type="text" class="form-control" placeholder="Guest name" #guestSearchBox id="guest-search-box"
+               (input)="filter([guestSearchBox.value, this.filterParams[1], this.filterParams[2], this.filterParams[3]])"/>
+      </div>
+      <div class="form-group">
+        <label for="table-search-box">Table number</label>
+        <input type="number" class="form-control" placeholder="Table number" min="1" #tableSearchBox
+               id="table-search-box"
+               (input)="filter([this.filterParams[0], this.filterParams[1], this.filterParams[2], tableSearchBox.value])"/>
+      </div>
+      <div class="row">
+        <div class="col-md-4 form-group">
+          <label for="start-date-selector">Earliest Date</label>
+          <app-date-selector  id="start-date-selector" (submitNewDate)="onStartDateChanged($event)"
+                             [initialDateAsString]="this.initialDate"></app-date-selector>
+          <app-time-selector  (submitNewTime)="onStartTimeChanged($event)" [initialHour]="startTime.substring(0,2)"
+                             [initialMinute]="startTime.substring(3,5)"></app-time-selector>
+        </div>
+        <div class="col-md-4 form-group">
+          <label for="end-date-selector">Latest Date</label>
+          <app-date-selector  id="end-date-selector" (submitNewDate)="onEndDateChanged($event)"
+                             [initialDateAsString]="this.initialDate"></app-date-selector>
+          <app-time-selector  (submitNewTime)="onEndTimeChanged($event)" [initialHour]="endTime.substring(0,2)"
+                             [initialMinute]="endTime.substring(3,5)"></app-time-selector>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-3">
+  <div class="card">
+    <div class="card-header bg-light">
+
+      <h5>Reservations:</h5>
+      <small class="pull-right">
+        <button id="view-all-button" type="button" class="nav-btn btn fas fa-calendar-alt" placement="top" ngbTooltip="Show all reservations." (click)="showAll()"></button>
+        <button id="view-nextTwoHours-button" class="nav-btn btn fas fa-clock" placement="top" ngbTooltip="Show next two hours" (click)="showNextTwoHours()"></button>
+        <button id="view-today-button" type="button" class="nav-btn btn fas fa-calendar-day" placement="top" ngbTooltip="Show Today's reservations" (click)="showToday()"></button>
+        <button id="collapse-filter-button" type="button" class="nav-btn btn fas fa-filter" placement="top" ngbTooltip="Filter for reservations" data-toggle="collapse"
+                data-target="#filter-container" aria-expanded="false"></button>
+        <button class="nav-btn btn fas fa-plus" (click)="openReservationAddForm($event)" placement="top" ngbTooltip="Add new reservation" data-toggle="modal" data-target=".addModal"></button>
+      </small>
+
+    </div>
+
+    <div class="card-body table-responsive">
+      <table class="table table-hover table-sm table-bordered">
+        <thead>
+        <th scope="col">Name</th>
+        <th scope="col">Start Time</th>
+        <th scope="col">End Time</th>
+        <th scope="col">Tables</th>
+        <th scope="col">Invoice</th>
+        <th scope="col">Finish</th>
+        <th scope="col">Edit</th>
+        <th scope="col">Delete</th>
+        </thead>
+        <tbody>
+        <tr *ngFor="let reservation of filteredReservations | async">
+          <td>{{reservation.guestName}}</td>
+          <td>{{reservation.startDateTime | date:'medium' }}</td>
+          <td>{{reservation.endDateTime | date:'medium' }}</td>
+          <td>
+            <span *ngFor="let table of reservation.restaurantTables; last as isLast">
+            <span *ngIf="!isLast">{{table.tableNum}}, </span>
+            <span *ngIf="isLast">{{table.tableNum}}</span>
+            </span>
+          </td>
+          <td>
+              <button class="nav-btn btn fas fa-money-bill-wave" (click)="openInvoiceReservation(reservation)"></button>
+          </td>
+          <td>
+              <button *ngIf="!reservationStartsInTheFuture(reservation) && !reservationFinishedInThePast(reservation)" class="nav-btn btn fas fa-calendar-check" (click)="finishReservation(reservation)"></button>
+              <button  *ngIf="reservationStartsInTheFuture(reservation)" class="nav-btn btn fas fa-calendar-check inactive" placement="top" ngbTooltip="The reservation has not started, yet."></button>
+              <button  *ngIf="reservationFinishedInThePast(reservation)" class="nav-btn btn fas fa-calendar-check inactive" placement="top" ngbTooltip="The reservation is already finished."></button>
+          </td>
+          <td>
+            <button *ngIf="!reservationStartedInThePast(reservation)" class="nav-btn btn btn-block fas fa-edit" (click)="openEditReservation(reservation)"></button>
+            <button *ngIf="reservationStartedInThePast(reservation)"  class="nav-btn btn btn-block fas fa-edit inactive" placement="top" ngbTooltip="The reservation can't be edited as it started already."></button>
+          </td>
+          <td>
+            <button class="nav-btn btn fas fa-trash" (click)="openDeleteReservation(reservation)"></button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
