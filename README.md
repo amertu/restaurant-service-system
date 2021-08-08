@@ -13,3 +13,5 @@ However, this does not necessarily have to be done interactively.
 3. Table reservation: The functionality of the table reservation must be given. A sophisticated interactive, graphical reservation functionality is not mandatory.
 
 4. Invoices: Dishes should be able to be added to an invoice. The invoice should be able to be exported as a PDF and show the names and prices of the products as well as the invoice total.
+
+Instructions how to run both backend and frontend of this application are provided in the corresponding reedme.
