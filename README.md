@@ -10,7 +10,7 @@ By developing a multi-user system, everyday operational activities can be manage
 2. Table management: For table reservation it is necessary to be able to create the tables of the restaurant in the system. 
 However, this does not necessarily have to be done interactively.
 
-3. Table reservation: The functionality of the table reservation must be given. A sophisticated interactive, graphical reservation functionality is not mandatory.
+3. Table reservation: The functionality of the table reservation must be given through interactive, graphical reservation functionality.
 
 4. Invoices: Dishes should be able to be added to an invoice. The invoice should be able to be exported as a PDF and show the names and prices of the products as well as the invoice total.
 
