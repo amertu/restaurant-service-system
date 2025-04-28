@@ -1,4 +1,4 @@
-# Real-Time Reservation and Automated Invoicing System
+# Real-Time Reservation, Orderning and Automated Invoicing System
 
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.2.6-brightgreen?logo=spring&logoColor=white)
 ![Angular](https://img.shields.io/badge/Angular-9.1.1-2E2E2E?logo=angular&logoColor=white)
@@ -17,6 +17,29 @@ This project implements a real-time reservation system with automated invoicing,
 - **Automated Invoicing**: Automatically generates invoices based on completed reservations, reducing manual effort.
 - **Workflow Automation**: Streamlines business processes to minimize human intervention and increase reliability.
 - **Front-End and Back-End Integration**: Ensures a smooth and responsive user experience through tight coupling of the client and server layers.
+  
+## Architecture
+```
+                                      +----------------+
+                                      |  Client Layer  |
+                                      +-------+--------+
+                                              |
+                                      +-------v--------+
+                                      |  API Gateway   |
+                                      +-------+--------+
+                                              |
+                     +------------------------v---------------------------+
+                     | Services (Reservation, Invoicing, User Management) |
+                     +------------------------+---------------------------+
+                                              |
+                           +------------------v-------------------+
+                           | Shared Persistence Layer (Repository)|
+                           +-----------------+--------------------+
+                                              |
+                            +-----------------v--------------------+
+                            |  Single Shared Database (One Schema) |
+                            +--------------------------------------+                                                     
+```
 
 ## Business Impact
 - **30% Reduction in Order Processing Time**: Optimized workflows led to faster operations and more efficient resource utilization.
