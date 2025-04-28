@@ -7,7 +7,6 @@
 ![HTML5](https://img.shields.io/badge/HTML-5-orange?logo=html5&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-4.4.1-7952B3?logo=bootstrap&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3.8.3-09476B?logo=typescript&logoColor=white)
-
 ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-2E2E2E?logo=intellijidea&logoColor=white)
 
 Web application in a 4+-layers architecture which simplifies the internal processes of the restaurant management via a digital solution.
