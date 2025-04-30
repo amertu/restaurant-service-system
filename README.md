@@ -19,7 +19,7 @@ This project implements a real-time reservation system with automated invoicing,
 - **Front-End and Back-End Integration**: Ensures a smooth and responsive user experience through tight coupling of the client and server layers.
   
 ## Architecture
-```
+```markdown
                                       +----------------+
                                       |  Client Layer  |
                                       +-------+--------+
