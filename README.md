@@ -9,6 +9,7 @@
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-4.4.1-7952B3?logo=bootstrap&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3.8.3-09476B?logo=typescript&logoColor=white)
 ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-2E2E2E?logo=intellijidea&logoColor=white)
+![Git](https://img.shields.io/badge/Git-2.49.0-f05133?logo=git&logoColor=white)
 
 This project implements a real-time reservation system with automated invoicing, designed to enhance operational efficiency and improve customer service. The application is built using **Java**, **Spring Boot**, and **Angular**, with a strong focus on seamless integration between front-end and back-end systems.
 
