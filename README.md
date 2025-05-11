@@ -1,15 +1,16 @@
 # End-to-End Restaurant Service Automation
 
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.2.6-brightgreen?logo=spring&logoColor=white)
-![Angular](https://img.shields.io/badge/Angular-19.0.0-2E2E2E?logo=angular&logoColor=white)
-![Docker Compose](https://img.shields.io/badge/Docker-28.0.4-blue?logo=docker&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-11-red?logo=openjdk&logoColor=white)
 ![UML](https://img.shields.io/badge/UML-FABD14?logo=uml&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-19.0.0-2E2E2E?logo=angular&logoColor=white)
 ![HTML5](https://img.shields.io/badge/HTML-5-orange?logo=html5&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.6-7952B3?logo=bootstrap&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.4.5-09476B?logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.2-blue?logo=postgresql&logoColor=white)
 ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-2E2E2E?logo=intellijidea&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-2.49.0-f05133?logo=git&logoColor=white)
+![Docker Compose](https://img.shields.io/badge/Docker-28.0.4-blue?logo=docker&logoColor=white)
 
 This project implements a real-time reservation system with automated invoicing, designed to enhance operational efficiency and improve customer service. The application is built using **Java**, **Spring Boot**, and **Angular**, with a strong focus on seamless integration between front-end and back-end systems.
 
