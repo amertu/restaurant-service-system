@@ -54,3 +54,4 @@ build/
 .vscode/
 ### Test Log ###
 test.log
+/.sh

@@ -7,6 +7,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-user-delete',
   templateUrl: './user-delete.component.html',
+  standalone: true,
   styleUrls: ['./user-delete.component.scss']
 })
 export class UserDeleteComponent implements OnInit {
@@ -17,7 +18,7 @@ export class UserDeleteComponent implements OnInit {
   ngOnInit() {
   }
 
-  private deleteUser(user: ApplicationUser) {
+  protected deleteUser(user: ApplicationUser) {
     this.applicationUserService.deleteAsAdmin(user.email, localStorage.getItem('username')).subscribe(
       () => {
         this.alertService.reportSuccessModal('Successfully deleted user.');

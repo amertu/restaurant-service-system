@@ -1,12 +1,17 @@
 import { Component, OnInit, Output, EventEmitter, Input, OnChanges } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import {FormControl, FormsModule} from '@angular/forms';
 import { timer } from 'rxjs';
-import {NgbTimeStruct} from '@ng-bootstrap/ng-bootstrap';
+import {NgbTimepicker, NgbTimeStruct} from '@ng-bootstrap/ng-bootstrap';
 import { NgbTimeStructAdapter } from '@ng-bootstrap/ng-bootstrap/timepicker/ngb-time-adapter';
 
 @Component({
   selector: 'app-time-selector',
   templateUrl: './time-selector.component.html',
+  standalone: true,
+  imports: [
+    NgbTimepicker,
+    FormsModule
+  ],
   styleUrls: ['./time-selector.component.scss']
 })
 export class TimeSelectorComponent implements OnInit, OnChanges {

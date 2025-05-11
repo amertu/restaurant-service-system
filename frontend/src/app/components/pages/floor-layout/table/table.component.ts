@@ -1,19 +1,25 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { AlertService } from '../../../../services/alert.service';
-import { Table } from '../../../../dtos/table';
-import { TableService } from '../../../../services/table.service';
-import { AuthService } from '../../../../services/auth.service';
-import { TableAddComponent } from './table-add/table-add.component';
-import { TableEditComponent } from './table-edit/table-edit.component';
-import { TableDeleteComponent } from './table-delete/table-delete.component';
-import { TableDeactivateComponent } from './table-deactivate/table-deactivate.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ReservationService } from '../../../../services/reservation.service';
-import { TimeUtilsService } from '../../../../services/time-utils.service';
+import {Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
+import {AlertService} from '../../../../services/alert.service';
+import {Table} from '../../../../dtos/table';
+import {TableService} from '../../../../services/table.service';
+import {AuthService} from '../../../../services/auth.service';
+import {TableAddComponent} from './table-add/table-add.component';
+import {TableEditComponent} from './table-edit/table-edit.component';
+import {TableDeleteComponent} from './table-delete/table-delete.component';
+import {TableDeactivateComponent} from './table-deactivate/table-deactivate.component';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ReservationService} from '../../../../services/reservation.service';
+import {TimeUtilsService} from '../../../../services/time-utils.service';
+import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-table',
   templateUrl: './table.component.html',
+  standalone: true,
+  imports: [
+    NgIf,
+    NgForOf
+  ],
   styleUrls: ['./table.component.scss']
 })
 export class TableComponent implements OnInit {
@@ -21,7 +27,7 @@ export class TableComponent implements OnInit {
   @Output() updateTables: EventEmitter<Table[]> = new EventEmitter<Table[]>();
 
   constructor(private tableService: TableService, private alertService: AlertService, private timeUtilsService: TimeUtilsService,
-    private authService: AuthService, private modalService: NgbModal, private reservationService: ReservationService) {
+              protected authService: AuthService, private modalService: NgbModal, private reservationService: ReservationService) {
   }
 
   ngOnInit(): void {
@@ -29,29 +35,29 @@ export class TableComponent implements OnInit {
 
   public loadAllTables() {
     console.log('loadAllTables()');
-    this.tableService.getAllTables().subscribe(
-      (tables: Table[]) => {
+    this.tableService.getAllTables().subscribe({
+      next: (tables: Table[]) => {
         this.tables = tables;
         this.updateTables.emit(this.tables);
       },
-      error => {
+      error: (error) => {
         console.log('Failed to load tables.');
         this.alertService.error(error);
       }
-    );
+    });
   }
 
   public setTableActive(table: Table, active: boolean) {
     this.alertService.vanishAll();
-    this.tableService.setTableActive(table.id, active).subscribe(
-      () => {
+    this.tableService.setTableActive(table.id, active).subscribe({
+      next: () => {
         this.loadAllTables();
       },
-      error => {
+      error: (error) => {
         if (error.status === 409) this.alertService.reportError(`Could not deactivate table ${table.tableNum}: there are reservations for it in the future!`);
         else this.alertService.error(error);
       }
-    );
+    });
   }
 
   public openEditTableForm(table: Table) {
@@ -62,33 +68,36 @@ export class TableComponent implements OnInit {
 
   public deleteTable(table: Table) {
     let startDate = this.timeUtilsService.getCurrentLocalTimeAsIsoString();
-    this.reservationService.filterReservations(null, startDate, new Date(2099, 12, 31).toISOString(), table.tableNum.toString()).subscribe(
-      reservations => {
+    this.reservationService.filterReservations(null, startDate, new Date(2099, 12, 31).toISOString(), table.tableNum.toString()).subscribe({
+      next: (reservations) => {
         const modalRef = this.modalService.open(TableDeleteComponent);
         modalRef.componentInstance.table = table;
         modalRef.componentInstance.reservations = reservations;
         modalRef.result.then(() => this.loadAllTables());
       },
-      error => {
+      error: (error) => {
         this.alertService.error(error);
       }
-    );
+    });
   }
 
-  private openAddTableForm() {
+  protected openAddTableForm() {
     const modalRef = this.modalService.open(TableAddComponent);
     modalRef.result.then(() => this.loadAllTables());
   }
 
-  private changeTableActive(table: Table, active: boolean) {
-    if(active) {
-      this.tableService.setTableActive(table.id, true).subscribe(table => this.loadAllTables(), error => this.alertService.error(error));
+  protected changeTableActive(table: Table, active: boolean) {
+    if (active) {
+      this.tableService.setTableActive(table.id, true).subscribe({
+        next: (table) => this.loadAllTables(),
+        error: (error) => this.alertService.error(error)
+      });
       return;
     }
 
     let startDate = this.timeUtilsService.getCurrentLocalTimeAsIsoString();
-    this.reservationService.filterReservations(null, startDate, new Date(2099, 12, 31).toISOString(), table.tableNum.toString()).subscribe(
-      reservations => {
+    this.reservationService.filterReservations(null, startDate, new Date(2099, 12, 31).toISOString(), table.tableNum.toString()).subscribe({
+      next: (reservations) => {
         if (reservations.length > 0) {
           const modalRef = this.modalService.open(TableDeactivateComponent);
           modalRef.componentInstance.table = table;
@@ -99,9 +108,9 @@ export class TableComponent implements OnInit {
           this.tableService.setTableActive(table.id, false).subscribe(table => this.loadAllTables());
         }
       },
-      error => {
+      error: (error) => {
         this.alertService.error(error);
       }
-    );
+    });
   }
 }

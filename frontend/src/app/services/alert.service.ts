@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Router} from '@angular/router';
-import { NgbActiveModal, NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { AlertContentForNgbModalComponent } from '../components/alert/alert-content-for-ngb-modal/alert-content-for-ngb-modal.component';
 
 
@@ -81,7 +81,7 @@ export class AlertService {
     this.referenceToModal.componentInstance.title = 'Error';
     this.referenceToModal.componentInstance.message = message;
   }
-  
+
   reportErrorMessageModal(message: string) {
     this.referenceToModal = this.modalService.open(AlertContentForNgbModalComponent);
     this.referenceToModal.componentInstance.title = 'Error';
@@ -113,7 +113,7 @@ export class AlertService {
   getErrorMessage(error: any): string {
     console.log('getErrorMessage');
     console.log(error);
-    
+
     if (error.status === 0) {
       // If status is 0, the backend is probably down
       console.log('If status is 0, the backend is probably down');

@@ -2,10 +2,24 @@ import { Component, OnInit } from '@angular/core';
 import { ReservationService } from 'src/app/services/reservation.service';
 import { Reservation } from 'src/app/dtos/reservation';
 import {AlertService} from '../../../services/alert.service';
+import {ReservationEditComponent} from './reservation-edit/reservation-edit.component';
+import {ReservationDetailsComponent} from './reservation-details/reservation-details.component';
+import {ReservationAddComponent} from './reservation-add/reservation-add.component';
+import {ReservationDeleteComponent} from './reservation-delete/reservation-delete.component';
+import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-reservation-list',
   templateUrl: './reservation.component.html',
+  standalone: true,
+  imports: [
+    ReservationEditComponent,
+    ReservationDetailsComponent,
+    ReservationAddComponent,
+    ReservationDeleteComponent,
+    NgIf,
+    NgForOf,
+  ],
   styleUrls: ['./reservation.component.scss']
 })
 

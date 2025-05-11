@@ -1,12 +1,18 @@
 import {Component, OnInit} from '@angular/core';
 import {AlertService} from '../../../../services/alert.service';
-import {FormBuilder, Validators} from '@angular/forms';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {DishService} from '../../../../services/dish.service';
 import {Dish} from '../../../../dtos/dish';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-dish-add',
   templateUrl: './dish-add.component.html',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgIf
+  ],
   styleUrls: ['./dish-add.component.scss']
 })
 export class DishAddComponent implements OnInit {

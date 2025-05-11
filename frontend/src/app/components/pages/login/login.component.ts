@@ -1,14 +1,20 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
 import {AuthService} from '../../../services/auth.service';
 import {AuthRequest} from '../../../dtos/auth-request';
 import {AlertService} from '../../../services/alert.service';
+import {NgIf} from '@angular/common';
 
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgIf
+  ],
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
@@ -44,17 +50,26 @@ export class LoginComponent implements OnInit {
    */
   authenticateUser(authRequest: AuthRequest) {
     console.log('Try to authenticate user: ' + authRequest.email);
-    this.authService.loginUser(authRequest).subscribe(
-      () => {
+
+    this.authService.loginUser(authRequest).subscribe({
+      next: async () => {
         console.log('Successfully logged in user: ' + authRequest.email);
-        this.router.navigate(['/message']);
+        this.authService.email = authRequest.email;
+
+        try {
+          await this.router.navigate(['/message']);
+          console.log('Navigation complete');
+        } catch (navError) {
+          console.error('Navigation failed:', navError);
+        }
       },
-      error => {
+      error: (error) => {
         console.log('Could not log in due to:');
         this.alertService.error(error);
       }
-    );
+    });
   }
+
 
   ngOnInit() {
   }

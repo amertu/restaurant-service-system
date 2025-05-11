@@ -1,12 +1,18 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
-import {FormBuilder, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Dish} from '../../../../dtos/dish';
 import {DishService} from '../../../../services/dish.service';
 import {AlertService} from '../../../../services/alert.service';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-dish-edit',
   templateUrl: './dish-edit.component.html',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgIf
+  ],
   styleUrls: ['./dish-edit.component.scss']
 })
 export class DishEditComponent implements OnInit, OnChanges {
@@ -18,12 +24,12 @@ export class DishEditComponent implements OnInit, OnChanges {
               private alertService: AlertService) {
   }
 
-  dishForm = this.formBuilder.group({
-    id: null,
-    name: ['', Validators.required],
-    price: [0, [Validators.required, Validators.min(0)]],
-    category: ['', Validators.required]
-  });
+  dishForm: FormGroup<{
+    id: FormControl<number | null>;
+    name: FormControl<string>;
+    price: FormControl<number>;
+    category: FormControl<string>;
+  }>;
 
   ngOnInit() {
     this.initDishFormGroup();
@@ -36,7 +42,7 @@ export class DishEditComponent implements OnInit, OnChanges {
   onSubmitUpdate() {
     this.submitted = true;
     if (this.dishForm.valid) {
-      const dishAdd: Dish = new Dish(this.dishForm.controls.id.value,
+      const dishAdd: Dish = new Dish(Math.round((this.dishForm.controls.price.value as number) * 100),
         this.dishForm.controls.name.value,
         Math.round(this.dishForm.controls.price.value * 100),
         this.dishForm.controls.category.value);
@@ -52,10 +58,10 @@ export class DishEditComponent implements OnInit, OnChanges {
 
   private initDishFormGroup() {
     this.dishForm = this.formBuilder.group({
-      id: [this.dish.id],
-      name: [this.dish.name, [Validators.required]],
-      price: [this.dish.price / 100, [Validators.required, Validators.min(0)]],
-      category:[this.dish.category,[Validators.required]]
+      id: this.formBuilder.control<number | null>(this.dish.id),
+      name: this.formBuilder.control<string>(this.dish.name, Validators.required),
+      price: this.formBuilder.control<number>(this.dish.price / 100, [Validators.required, Validators.min(0)]),
+      category: this.formBuilder.control<string>(this.dish.category, Validators.required)
     });
   }
 

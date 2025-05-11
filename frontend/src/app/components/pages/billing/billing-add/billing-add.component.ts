@@ -5,25 +5,28 @@ import {BillService} from '../../../../services/bill.service';
 import {DishService} from '../../../../services/dish.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Reservation } from 'src/app/dtos/reservation';
-import { stringify } from '@angular/compiler/src/util';
-import { formatDate } from '@angular/common';
+import {DatePipe, formatDate} from '@angular/common';
 import { Bill } from 'src/app/dtos/bill';
 import { TimeUtilsService } from 'src/app/services/time-utils.service';
 
 @Component({
   selector: 'app-billing-add',
   templateUrl: './billing-add.component.html',
+  standalone: true,
+  imports: [
+    DatePipe
+  ],
   styleUrls: ['./billing-add.component.scss']
 })
 export class BillingAddComponent implements OnInit {
-  
+
   @Input() reservation: Reservation;
   reservedTablesAsString: string;
 
   dishes: Dish[] = [];
   private selectedDishes: number[] = [];
   private selectedDishesObjects: Dish[] = [];
-  private selectedNumber: number[] = [];
+  protected selectedNumber: number[] = [];
 
   error: boolean = false;
   errorMessage: string = '';

@@ -7,15 +7,21 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { formatDate } from '@angular/common';
 import { TimeUtilsService } from 'src/app/services/time-utils.service';
+import {ReservationFormComponent, ReservationFormType} from '../reservation-form/reservation-form.component';
 
 
 @Component({
   selector: 'app-reservation-add',
   templateUrl: './reservation-add.component.html',
+  standalone: true,
+  imports: [
+    ReservationFormComponent
+  ],
   styleUrls: ['./reservation-add.component.scss']
 })
 export class ReservationAddComponent implements OnInit {
   initialReservation: Reservation;
+  readonly formTypeAdd = ReservationFormType.add;
 
   constructor(
               public activeModal: NgbActiveModal,

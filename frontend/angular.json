@@ -3,21 +3,25 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "sepm-group-phase": {
+    "spring-frontend": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
       "prefix": "app",
       "schematics": {
         "@schematics/angular:component": {
-          "styleext": "scss"
+          "inlineStyle": false,
+          "inlineTemplate": false,
+          "skipTests": false,
+          "changeDetection": "Default",
+          "style": "scss"
         }
       },
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/sepm-group-phase",
+            "outputPath": "dist/spring-frontend",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -29,14 +33,29 @@
             "styles": [
               "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.css",
-              "node_modules/@fortawesome/fontawesome-free//css/all.css"
+              "node_modules/@fortawesome/fontawesome-free/css/all.css"
             ],
             "scripts": [
-              "node_modules/jquery/dist/jquery.slim.min.js",
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.js"
             ]
           },
           "configurations": {
+            "configurations": {
+                "optimization": true,
+                "outputHashing": "all",
+                "sourceMap": false,
+                "namedChunks": false,
+                "aot": true,
+                "extractLicenses": true,
+                "vendorChunk": false,
+                "buildOptimizer": true,
+                "fileReplacements": [
+                  {
+                    "replace": "src/environments/environment.ts",
+                    "with": "src/environments/environment.dev.ts"
+                  }
+                ]
+
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -47,7 +66,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
@@ -66,18 +84,20 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "sepm-group-phase:build"
+            "buildTarget": "spring-frontend:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "sepm-group-phase:build:production"
+              "browserTarget": "spring-frontend:build:production"
+            },
+            "development": {
+              "browserTarget": "spring-frontend:build:development"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "sepm-group-phase:build"
           }
         },
         "test": {
@@ -111,7 +131,7 @@
         }
       }
     },
-    "sepm-group-phase-e2e": {
+    "spring-frontend-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "prefix": "",
@@ -120,11 +140,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "sepm-group-phase:serve"
+            "devServerTarget": "spring-frontend:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "sepm-group-phase:serve:production"
+              "devServerTarget": "spring-frontend:serve:production"
             }
           }
         },
@@ -140,7 +160,6 @@
       }
     }
   },
-  "defaultProject": "sepm-group-phase",
   "cli": {
     "analytics": "d6418cf0-1898-4242-a15e-fb3345497c88"
   }

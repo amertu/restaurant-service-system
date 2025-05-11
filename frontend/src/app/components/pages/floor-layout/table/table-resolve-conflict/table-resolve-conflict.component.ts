@@ -1,16 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from "@angular/router";
-import { Router } from '@angular/router';
-import { Table } from 'src/app/dtos/table';
-import { Reservation } from 'src/app/dtos/reservation';
-import { TableService } from '../../../../../services/table.service';
-import { ReservationService } from '../../../../../services/reservation.service';
+import {Component, OnInit} from '@angular/core';
+import {ActivatedRoute, RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
+import {Table} from 'src/app/dtos/table';
+import {Reservation} from 'src/app/dtos/reservation';
+import {TableService} from '../../../../../services/table.service';
+import {ReservationService} from '../../../../../services/reservation.service';
 import {AlertService} from '../../../../../services/alert.service';
-import { FloorLayout } from '../../../../../dtos/floor-layout';
-import { FloorLayoutService } from '../../../../../services/floor-layout.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ReservationEditComponent } from '../../../reservation/reservation-edit/reservation-edit.component';
-import { ReservationDeleteComponent } from '../../../reservation/reservation-delete/reservation-delete.component';
+import {FloorLayout} from '../../../../../dtos/floor-layout';
+import {FloorLayoutService} from '../../../../../services/floor-layout.service';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ReservationEditComponent} from '../../../reservation/reservation-edit/reservation-edit.component';
+import {ReservationDeleteComponent} from '../../../reservation/reservation-delete/reservation-delete.component';
+import {NgForOf, NgIf} from '@angular/common';
 
 enum reservationFormType {
   add = 'Add',
@@ -20,12 +21,19 @@ enum reservationFormType {
 @Component({
   selector: 'app-table-resolve-conflict',
   templateUrl: './table-resolve-conflict.component.html',
+  standalone: true,
+  imports: [
+    NgIf,
+    NgForOf,
+    RouterLink
+  ],
   styleUrls: ['./table-resolve-conflict.component.scss']
 })
 export class TableResolveConflictComponent implements OnInit {
 
-  constructor(private route: ActivatedRoute, private router:Router, private modalService: NgbModal, private tableService: TableService,
-    private reservationService: ReservationService, private alertService: AlertService, private layoutService: FloorLayoutService) { }
+  constructor(private route: ActivatedRoute, private router: Router, private modalService: NgbModal, private tableService: TableService,
+              private reservationService: ReservationService, private alertService: AlertService, private layoutService: FloorLayoutService) {
+  }
 
   table: Table;
   reservations: Reservation[];
@@ -42,27 +50,27 @@ export class TableResolveConflictComponent implements OnInit {
   }
 
   loadData(tableId: number) {
-    this.tableService.getTableWithId(tableId).subscribe(
-      table => {
+    this.tableService.getTableWithId(tableId).subscribe({
+      next: (table) => {
         this.table = table;
         let startDate = new Date().toISOString();
         let endDate = new Date('2099-12-31T23:59:00').toISOString();
-        this.reservationService.filterReservations(null, startDate, endDate, this.table.tableNum.toString()).subscribe(
-          reservations => {
+        this.reservationService.filterReservations(null, startDate, endDate, this.table.tableNum.toString()).subscribe({
+          next: (reservations) => {
             this.reservations = reservations;
             console.log(`found ${reservations.length} reservations for table ${table.tableNum}`);
             this.dataLoaded = true;
           },
-          error => {
+          error: (error) => {
             this.alertService.reportError(error.message)
           }
-        )
+        })
       },
-      error => {
-        if(error.status == 404) this.router.navigate(['/table']);
+      error: (error) => {
+        if (error.status == 404) this.router.navigate(['/table']);
         else this.alertService.reportError(error.message)
       }
-    )
+    })
   }
 
   public formatDate(date: string): string {
@@ -71,31 +79,31 @@ export class TableResolveConflictComponent implements OnInit {
 
   completeDesiredAction() {
     if (this.delete) {//delete
-      this.tableService.deleteTable(this.table.id).subscribe(
-        () => {
+      this.tableService.deleteTable(this.table.id).subscribe({
+        next: () => {
           this.deleteFromLayout(this.table.id);
           this.desiredActionComplete = true;
         },
-        error => {
+        error: (error) => {
           this.alertService.error(error);
         }
-      );
+      });
     } else {//deactivate
-      this.tableService.setTableActive(this.table.id, false).subscribe(
-        () => {
+      this.tableService.setTableActive(this.table.id, false).subscribe({
+        next: () => {
           this.desiredActionComplete = true;
         },
-        error => {
+        error: (error) => {
           this.alertService.error(error);
         }
-      );
+      });
     }
   }
 
   private deleteFromLayout(id: number): void {
     let currLayout;
-    this.layoutService.getLayoutWithId(1).subscribe(
-      data => {
+    this.layoutService.getLayoutWithId(1).subscribe({
+      next: (data) => {
         currLayout = JSON.parse(data.serializedLayout);
         console.log("Layout successfully loaded!");
         let layoutObjects = currLayout.objects;
@@ -110,21 +118,21 @@ export class TableResolveConflictComponent implements OnInit {
           this.updateLayout(JSON.stringify(currLayout));
         }
       },
-      error => {
+      error: () => {
         console.log("Layout could not be loaded!");
       }
-    );
+    });
   }
 
   private updateLayout(newLayout: string): void {
-    this.layoutService.updateLayout(new FloorLayout(1, newLayout)).subscribe(
-      () => {
+    this.layoutService.updateLayout(new FloorLayout(1, newLayout)).subscribe({
+      next: () => {
         console.log("Layout has been updated!");
       },
-      error => {
+      error: (error) => {
         console.log("Layout could not be updated!");
       }
-    );
+    });
   }
 
   openEditReservation(reservation: Reservation) {

@@ -3,13 +3,22 @@ import {MessageService} from '../../../services/message.service';
 import {Message} from '../../../dtos/message';
 import {NgbPaginationConfig} from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService} from '../../../services/auth.service';
 import {AlertService} from '../../../services/alert.service';
+import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-message',
   templateUrl: './message.component.html',
+  standalone: true,
+  imports: [
+    DatePipe,
+    NgClass,
+    ReactiveFormsModule,
+    NgForOf,
+    NgIf
+  ],
   styleUrls: ['./message.component.scss']
 })
 export class MessageComponent implements OnInit {
@@ -19,7 +28,7 @@ export class MessageComponent implements OnInit {
   private message: Message[];
 
   constructor(private messageService: MessageService, private ngbPaginationConfig: NgbPaginationConfig, private formBuilder: FormBuilder,
-              private cd: ChangeDetectorRef, private authService: AuthService, private alertService: AlertService) {
+              private cd: ChangeDetectorRef, protected authService: AuthService, private alertService: AlertService) {
     this.messageForm = this.formBuilder.group({
       title: ['', [Validators.required]],
       summary: ['', [Validators.required]],
@@ -56,12 +65,14 @@ export class MessageComponent implements OnInit {
    * @param message the message which should be created
    */
   createMessage(message: Message) {
-    this.messageService.createMessage(message).subscribe(
-      () => {
-        this.loadMessage();
-      },
-      error => {
-        this.alertService.error(error);
+    this.messageService.createMessage(message).subscribe({
+        next: () => {
+          this.loadMessage();
+        },
+        error: (error) => {
+          console.log('Error while creating a message');
+          this.alertService.error(error);
+        }
       }
     );
   }
@@ -85,13 +96,15 @@ export class MessageComponent implements OnInit {
    * @param id the id of the message which details should be loaded
    */
   loadMessageDetails(id: number) {
-    this.messageService.getMessageById(id).subscribe(
-      (message: Message) => {
-        const result = this.message.find(x => x.id === id);
-        result.text = message.text;
-      },
-      error => {
-        this.alertService.error(error);
+    this.messageService.getMessageById(id).subscribe({
+        next: (message) => {
+          const result = this.message.find(x => x.id === id);
+          result.text = message.text;
+        }
+        ,
+        error: (error) => {
+          this.alertService.error(error);
+        }
       }
     );
   }
@@ -100,12 +113,13 @@ export class MessageComponent implements OnInit {
    * Loads the specified page of message from the backend
    */
   private loadMessage() {
-    this.messageService.getMessage().subscribe(
-      (message: Message[]) => {
-        this.message = message;
-      },
-      error => {
-        this.alertService.error(error);
+    this.messageService.getMessage().subscribe({
+        next: (message: Message[]) => {
+          this.message = message;
+        },
+        error: (error) => {
+          this.alertService.error(error);
+        }
       }
     );
   }

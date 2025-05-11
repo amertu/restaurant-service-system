@@ -1,3 +1,5 @@
-<app-reservation-form (submitReservation)="updateReservation($event)" [type]="'Edit'"
-                        [initialReservation]="reservation"></app-reservation-form>
-
+<app-reservation-form
+  (submitReservation)="updateReservation($event)"
+  [type]= "formTypeEdit"
+  [initialReservation]="reservation">
+</app-reservation-form>

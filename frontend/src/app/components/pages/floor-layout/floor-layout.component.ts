@@ -2,7 +2,7 @@ import {Component, ElementRef, OnInit, ViewChild, ViewEncapsulation} from '@angu
 import {TableService} from '../../../services/table.service';
 import {Table} from '../../../dtos/table';
 import {AlertService} from '../../../services/alert.service';
-import {fabric} from 'fabric';
+import * as fabric from 'fabric';
 import {FloorLayoutService} from '../../../services/floor-layout.service';
 import {FloorLayout} from '../../../dtos/floor-layout';
 import {AuthService} from '../../../services/auth.service';
@@ -15,6 +15,9 @@ import {TableDeactivateComponent} from './table/table-deactivate/table-deactivat
 import {ReservationService} from '../../../services/reservation.service';
 import {TimeUtilsService} from '../../../services/time-utils.service';
 import {concat} from 'rxjs';
+import {TableComponent} from "./table/table.component";
+import {NgIf} from "@angular/common";
+import {Canvas} from "fabric";
 
 let layoutRef;
 
@@ -22,6 +25,11 @@ let layoutRef;
   selector: 'app-floor-layout',
   templateUrl: './floor-layout.component.html',
   styleUrls: ['./floor-layout.component.scss'],
+  standalone: true,
+  imports: [
+    TableComponent,
+    NgIf
+  ],
   encapsulation: ViewEncapsulation.None
 })
 
@@ -38,15 +46,21 @@ export class FloorLayoutComponent implements OnInit {
     layoutRef = this;
   }
 
-  tableList: Table[];
-  nrOfTables: number;
-  canvas;
-  locked = !this.authService.isAdmin();
-  layoutLoaded: boolean;
-  clickedTable: Table;
-  layoutEdited: boolean;
-  editingWalls = false;
-  selectedTable: Table;
+  protected tableList: Table[];
+  private nrOfTables: number;
+  private canvas: Canvas;
+  private locked = !this.authService.isAdmin();
+  private layoutLoaded: boolean;
+  private clickedTable: Table;
+  protected layoutEdited: boolean;
+  protected editingWalls = false;
+  private selectedTable: Table;
+
+  private deleteImg: HTMLImageElement;
+  private editImg: HTMLImageElement;
+  private statusImg: HTMLImageElement;
+  private cloneImg: HTMLImageElement;
+  private customControls: any;
 
   // svg-path strings for seatCount pictogram (see also: assets/user-solid.svg)
   pathHeadString = 'm210.351562 246.632812c33.882813 0 63.222657-12.152343 87.195313-36.128906 23.972656-23.972656 ' +
@@ -73,17 +87,18 @@ export class FloorLayoutComponent implements OnInit {
 
   loadTables() {
     console.log('loadAllTables()');
-    this.tableService.getAllTables().subscribe(
-      (tables: Table[]) => {
+    this.tableService.getAllTables().subscribe({
+      next: (tables: Table[]) => {
         this.tableList = tables;
         this.nrOfTables = tables.length;
         this.loadLayout();
-      },
-      error => {
+      }
+      ,
+      error: (error) => {
         console.log('Failed to load tables.');
         this.alertService.error(error);
       }
-    );
+    });
   }
 
   onUpdateTables(tables: Table[]) {
@@ -93,89 +108,119 @@ export class FloorLayoutComponent implements OnInit {
   }
 
   fabricCanvas() {
-    this.canvas = new fabric.Canvas('c');
-    this.canvas.setWidth(800);
-    this.canvas.setHeight(800);
-    const deleteIcon = 'https://image.flaticon.com/icons/png/512/61/61848.png';
-    const deleteImg = document.createElement('img');
-    deleteImg.src = deleteIcon;
-    const editIcon = 'https://image.flaticon.com/icons/png/512/84/84380.png';
-    const editImg = document.createElement('img');
-    editImg.src = editIcon;
-    let statusIcon = 'https://freesvg.org/img/power-icon.png';
-    let statusImg = document.createElement('img');
-    statusImg.src = statusIcon;
-    let cloneIcon = 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Font_Awesome_5_regular_copy.svg/200px-Font_Awesome_5_regular_copy.svg.png';
-    let cloneImg = document.createElement('img');
-    cloneImg.src = cloneIcon;
-    fabric.Object.prototype.objectCaching = false;
-    fabric.Object.prototype.transparentCorners = false;
-    fabric.Object.prototype.cornerColor = 'blue';
-    fabric.Object.prototype.cornerStyle = 'circle';
-    this.canvas.on('selection:created', function (ev) {
-      ev.target.snapAngle = 15;
+    // Create and configure canvas
+    this.canvas = new fabric.Canvas('c', {
+      width: 800,
+      height: 800,
+      selection: false
     });
 
-    fabric.Object.prototype.controls.deleteControl = new fabric.Control({
-      position: {x: 0.5, y: -0.5},
-      offsetY: -16,
-      offsetX: 16,
-      cursorStyle: 'pointer',
-      mouseUpHandler: (eventData, target) => this.deleteObjGroup(eventData, target),
-      render: this.renderIcon(deleteImg),
-      cornerSize: 24
-    });
+    // Define icons
+    const icons = {
+      delete: 'https://image.flaticon.com/icons/png/512/61/61848.png',
+      edit: 'https://image.flaticon.com/icons/png/512/84/84380.png',
+      status: 'https://freesvg.org/img/power-icon.png',
+      clone: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Font_Awesome_5_regular_copy.svg/200px-Font_Awesome_5_regular_copy.svg.png'
+    };
 
-    fabric.Object.prototype.controls.editControl = new fabric.Control({
-      position: {x: -0.5, y: -0.5},
-      offsetY: -16,
-      offsetX: -16,
-      cursorStyle: 'pointer',
-      mouseUpHandler: (eventData, target) => this.editObjGroup(eventData, target),
-      render: this.renderIcon(editImg),
-      cornerSize: 24
-    });
+    const deleteImg = new Image();
+    deleteImg.src = icons.delete;
 
-    fabric.Object.prototype.controls.statusControl = new fabric.Control({
-      position: {x: 0.5, y: 0.5},
-      offsetY: 16,
-      offsetX: 16,
-      cursorStyle: 'pointer',
-      mouseUpHandler: (eventData, target) => this.changeObjGroupStatus(eventData, target),
-      render: this.renderIcon(statusImg),
-      cornerSize: 24
-    });
+    const editImg = new Image();
+    editImg.src = icons.edit;
 
-    fabric.Object.prototype.controls.cloneControl = new fabric.Control({
-      position: {x: -0.5, y: 0.5},
-      offsetY: 16,
-      offsetX: -16,
-      cursorStyle: 'pointer',
-      mouseUpHandler: (eventData, target) => this.cloneObjGroup(eventData, target),
-      render: this.renderIcon(cloneImg),
-      cornerSize: 24
-    });
+    const statusImg = new Image();
+    statusImg.src = icons.status;
 
-    this.canvas.on('object:moving', function (e) {
-      var obj = e.target;
-      // if object is too big ignore
-      if (obj.currentHeight > obj.canvas.height || obj.currentWidth > obj.canvas.width) {
-        return;
+    const cloneImg = new Image();
+    cloneImg.src = icons.clone;
+
+    // Canvas global object defaults
+    fabric.FabricObject.prototype.objectCaching = false;
+    fabric.FabricObject.prototype.transparentCorners = false;
+    fabric.FabricObject.prototype.cornerColor = 'blue';
+    fabric.FabricObject.prototype.cornerStyle = 'circle';
+
+    // Add custom controls to each object manually
+    const addCustomControls = (obj: fabric.Object) => {
+      obj.controls = {
+        deleteControl: new fabric.Control({
+          x: 0.5,
+          y: -0.5,
+          offsetY: -16,
+          offsetX: 16,
+          cursorStyle: 'pointer',
+          mouseUpHandler: (eventData, target) => this.deleteObjGroup(eventData, target),
+          render: this.renderIcon(deleteImg),
+        }),
+        editControl: new fabric.Control({
+          x: -0.5,
+          y: -0.5,
+          offsetY: -16,
+          offsetX: -16,
+          cursorStyle: 'pointer',
+          mouseUpHandler: (eventData, target) => this.editObjGroup(eventData, target),
+          render: this.renderIcon(editImg),
+        }),
+        statusControl: new fabric.Control({
+          x: 0.5,
+          y: 0.5,
+          offsetY: 16,
+          offsetX: 16,
+          cursorStyle: 'pointer',
+          mouseUpHandler: (eventData, target) => this.changeObjGroupStatus(eventData, target),
+          render: this.renderIcon(statusImg),
+        }),
+        cloneControl: new fabric.Control({
+          x: -0.5,
+          y: 0.5,
+          offsetY: 16,
+          offsetX: -16,
+          cursorStyle: 'pointer',
+          mouseUpHandler: (eventData, target) => this.cloneObjGroup(eventData, target),
+          render: this.renderIcon(cloneImg),
+        }),
+      };
+    };
+
+    // Apply snapAngle on selection
+    this.canvas.on('selection:created', (ev) => {
+      const target = ev.selected?.[0];
+      if (target) {
+        target.snapAngle = 15;
+        addCustomControls(target);
       }
+    });
+
+    // Prevent objects from moving outside canvas bounds
+    this.canvas.on('object:moving', (e) => {
+      const obj = e.target;
+      if (!obj || !obj.canvas) return;
+
+      const bounds = obj.getBoundingRect();
+      const canvas = obj.canvas;
+
+      // skip oversized objects
+      if (bounds.width > canvas.width || bounds.height > canvas.height) return;
+
       obj.setCoords();
-      // top-left  corner
-      if (obj.getBoundingRect().top < 0 || obj.getBoundingRect().left < 0) {
-        obj.top = Math.max(obj.top, obj.top - obj.getBoundingRect().top);
-        obj.left = Math.max(obj.left, obj.left - obj.getBoundingRect().left);
+
+      // restrict movement
+      if (bounds.left < 0) {
+        obj.left = Math.max(obj.left, obj.left - bounds.left);
       }
-      // bot-right corner
-      if (obj.getBoundingRect().top + obj.getBoundingRect().height > obj.canvas.height || obj.getBoundingRect().left + obj.getBoundingRect().width > obj.canvas.width) {
-        obj.top = Math.min(obj.top, obj.canvas.height - obj.getBoundingRect().height + obj.top - obj.getBoundingRect().top);
-        obj.left = Math.min(obj.left, obj.canvas.width - obj.getBoundingRect().width + obj.left - obj.getBoundingRect().left);
+      if (bounds.top < 0) {
+        obj.top = Math.max(obj.top, obj.top - bounds.top);
+      }
+      if (bounds.left + bounds.width > canvas.width) {
+        obj.left = Math.min(obj.left, canvas.width - bounds.width + obj.left - bounds.left);
+      }
+      if (bounds.top + bounds.height > canvas.height) {
+        obj.top = Math.min(obj.top, canvas.height - bounds.height + obj.top - bounds.top);
       }
     });
-    this.canvas.selection = false;
   }
+
 
   renderIcon(icon) {
     return function renderIcon(ctx, left, top, styleOverride, fabricObject) {
@@ -231,7 +276,7 @@ export class FloorLayoutComponent implements OnInit {
             angle: cloned.angle
           });
 
-          objGroup.id = table.id;
+          objGroup.set('id', table.id);
           objGroup.selectable = true;
           objGroup.snapAngle = 15;
           objGroup.on('mousedown', function () {
@@ -260,16 +305,6 @@ export class FloorLayoutComponent implements OnInit {
     layoutRef.openEditTableForm(layoutRef.clickedTable);
   }
 
-  getPolygon(): number {
-    const objects = this.canvas.getObjects();
-    for (let i = 0; i < objects.length; i++) {
-      if (objects[i].name === 'poly') {
-        return i;
-      }
-    }
-    return 0;
-  }
-
   getDefaultPoints() {
     return [{x: 50, y: 50},
       {x: 400, y: 50},
@@ -281,70 +316,16 @@ export class FloorLayoutComponent implements OnInit {
       {x: 50, y: 400}];
   }
 
-  createDefaultWalls() {
-    this.createWalls(this.getDefaultPoints());
-  }
-
-  createWalls(points: { x, y }[]) {
-    const options = {selectable: false, objectCaching: false};
-    const polygon = new fabric.Polygon(points, options);
-    polygon.name = 'poly';
-    polygon.fill = '#DDD';
-    polygon.evented = false;
-    polygon.hasBorders = false;
-    polygon.hasControls = false;
-    polygon.toObject = (function (toObject) {
-      return function () {
-        return fabric.util.object.extend(toObject.call(this), {
-          name: this.name
-        });
-      };
-    })(polygon.toObject);
-    this.canvas.add(polygon);
-    this.canvas.sendToBack(polygon);
-  }
-
-  createPoints() {
-    const polygon = this.canvas.getObjects()[this.getPolygon()];
-    const points = polygon.points;
-    const options = {objectCaching: false};
-    for (let i = 0; i < points.length; i++) {
-      const circle = new fabric.Circle({
-        radius: 10,
-        fill: 'green',
-        left: points[i].x,
-        top: points[i].y,
-        originX: 'center',
-        originY: 'center',
-        hasBorders: false,
-        hasControls: false,
-        name: 'p' + i
-      }, {options});
-      circle.excludeFromExport = true;
-      this.canvas.add(circle);
-    }
-    this.canvas.on('object:moving', function (obj) {
-      if (obj.target.name && obj.target.name.substring(0, 1) === 'p') {
-        polygon.points[obj.target.name.substring(1)] = {
-          x: obj.target.getCenterPoint().x,
-          y: obj.target.getCenterPoint().y
-        };
-      }
-    });
-  }
-
   private changeObjGroupStatus(eventData, target) {
     layoutRef.saveLayout();
     let table = layoutRef.getTableFromList(target.id);
     if (table.active) {
       this.deactivateTable(this.clickedTable)
     } else {
-      this.tableService.setTableActive(table.id, true).subscribe(
-        data => {
-          this.loadTables();
-        },
-        error => console.error(`could not set table ${table.tableNum} active`)
-      )
+      this.tableService.setTableActive(table.id, true).subscribe({
+        next: (data) => this.loadTables(),
+        error: (error) => console.error(`could not set table ${table.tableNum} active`)
+      })
     }
   }
 
@@ -363,7 +344,7 @@ export class FloorLayoutComponent implements OnInit {
 
       });
 
-      const text = new fabric.Text(table.tableNum.toString(), {
+      const text = new fabric.FabricText(table.tableNum.toString(), {
         fontFamily: 'Arial',
         fontSize: 15,
         textAlign: 'center',
@@ -388,7 +369,7 @@ export class FloorLayoutComponent implements OnInit {
         left: 100,
         top: 250 + (i * 70)
       });
-      objGroup.id = table.id;
+      objGroup.set('id', table.id);
       objGroup.selectable = false;
       objGroup.snapAngle = 15;
       this.canvas.add(objGroup);
@@ -397,26 +378,20 @@ export class FloorLayoutComponent implements OnInit {
     }
   }
 
-  enoughPoints(): boolean {
-    const poly = this.canvas.getObjects()[this.getPolygon()];
-    return poly && poly.points.length > 32;
+// Retrieve the polygon used for walls
+  getPolygon(): fabric.Polygon | null {
+    return this.canvas.getObjects().find(
+      (obj) => obj.get('meta')?.type === 'polygon'
+    ) as fabric.Polygon | null;
   }
 
-  splitPoints() {
-    const poly = this.canvas.getObjects()[this.getPolygon()];
-    const points = poly.points;
-    const newPoints = [];
-    for (let i = 0; i < points.length; i++) {
-      newPoints.push(points[i]);
-      newPoints.push({
-        x: (points[i].x + points[(i + 1) % points.length].x) / 2,
-        y: (points[i].y + points[(i + 1) % points.length].y) / 2
-      });
+// Delete polygon object safely
+  deletePolygon() {
+    const polygon = this.getPolygon();
+    if (polygon) {
+      this.canvas.remove(polygon);
+      this.canvas.renderAll();
     }
-    this.deletePointsAndPolygon();
-    this.createWalls(newPoints);
-    this.createPoints();
-    this.canvas.renderAll();
   }
 
   deletePointsAndPolygon() {
@@ -424,125 +399,220 @@ export class FloorLayoutComponent implements OnInit {
     this.deletePolygon();
   }
 
-  deletePoints() {
-    const objects = this.canvas.getObjects();
-    for (let i = objects.length - 1; i >= 0; i--) {
-      if (objects[i].name && objects[i].name.substring(0, 1) === 'p' && objects[i].name !== 'poly') {
-        this.canvas.remove(objects[i]);
-      }
+  enoughPoints(): boolean {
+    const polygon = this.getPolygon();
+    return polygon ? polygon.points.length > 32 : false;
+  }
+
+  splitPoints() {
+    const polygon = this.getPolygon();
+    if (!polygon) return;
+
+    const points = polygon.points;
+    const newPoints: { x: number; y: number }[] = [];
+    for (let i = 0; i < points.length; i++) {
+      newPoints.push(points[i]);
+      newPoints.push({
+        x: (points[i].x + points[(i + 1) % points.length].x) / 2,
+        y: (points[i].y + points[(i + 1) % points.length].y) / 2,
+      });
     }
+
+    this.deletePointsAndPolygon();
+    this.createWalls(newPoints);
+    this.createPoints();
     this.canvas.renderAll();
   }
 
-  deletePolygon() {
-    this.canvas.remove(this.canvas.getObjects()[this.getPolygon()]);
+  deletePoints() {
+    const objects = this.canvas.getObjects();
+    objects.forEach((obj) => {
+      const meta = obj.get('meta');
+      if (meta?.type === 'circle' && meta?.id?.startsWith('p')) {
+        this.canvas.remove(obj);
+      }
+    });
+    this.canvas.renderAll();
+  }
+
+  createPoints() {
+    const polygon = this.getPolygon();
+    if (!polygon) return;
+
+    polygon.points.forEach((point, index) => {
+      const canvasPoint = fabric.util.transformPoint(
+        { x: point.x - polygon.pathOffset.x, y: point.y - polygon.pathOffset.y },
+        polygon.calcTransformMatrix()
+      );
+
+      const circle = new fabric.Circle({
+        width: 20, // diameter (2 * radius)
+        height: 20, // diameter (2 * radius)
+        fill: 'green',
+        left: canvasPoint.x - 10, // Adjust to center the circle
+        top: canvasPoint.y - 10, // Adjust to center the circle
+        hasBorders: false,
+        hasControls: false,
+        objectCaching: false,
+        excludeFromExport: true,
+      });
+
+      circle.set('meta', { id: `p${index}`, type: 'circle' });
+      this.canvas.add(circle);
+    });
+
+    this.canvas.on('object:moving', (event) => {
+      const target = event.target;
+      const meta = target.get('meta');
+      const id = meta?.('id');
+      const type = meta?.('type');
+      if (type === 'circle' && id?.startsWith('p')) {
+        const index = parseInt(id.slice(1), 10);
+        const polygon = this.getPolygon();
+        if (polygon) {
+          const localPoint = fabric.util.transformPoint(
+            {
+              x: target.left + 10, // Adjust for center alignment
+              y: target.top + 10, // Adjust for center alignment
+            },
+            fabric.util.invertTransform(polygon.calcTransformMatrix())
+          );
+
+          polygon.points[index] = {
+            x: localPoint.x + polygon.pathOffset.x,
+            y: localPoint.y + polygon.pathOffset.y,
+          };
+
+          if (polygon.setCoords) {
+            polygon.setCoords(); // Ensure coordinates are updated
+          }
+
+          this.canvas.requestRenderAll();
+        }
+      }
+    });
+  }
+
+
+  createDefaultWalls() {
+    this.createWalls(this.getDefaultPoints());
+  }
+
+  createWalls(points: { x: number; y: number }[]) {
+    const polygon = new fabric.Polygon(points, {
+      selectable: false,
+      objectCaching: false,
+      fill: '#DDD',
+      evented: false,
+      hasBorders: false,
+      hasControls: false,
+    });
+
+    polygon.set('meta', { type: 'polygon' });
+    this.canvas.add(polygon);
+    this.canvas.sendObjectToBack(polygon);
   }
 
   editWalls() {
     this.editingWalls = !this.editingWalls;
-    if (this.editingWalls) {
-      this.createPoints();
-    } else {
-      this.deletePoints();
-    }
+    this.editingWalls ? this.createPoints() : this.deletePoints();
     console.log(this.canvas.getObjects().length);
   }
 
   setWalls() {
-    const objects = this.canvas.getObjects();
-    const points = objects[this.getPolygon()].points;
+    const polygon = this.getPolygon();
+    if (!polygon) {
+      console.error('No valid polygon found. Aborting setWalls.');
+      return;
+    }
+
+    const points = polygon.points;
+    if (!Array.isArray(points) || points.length < 2) {
+      console.error('Invalid or insufficient points for walls.');
+      return;
+    }
+
     this.deletePolygon();
     this.createWalls(points);
     this.canvas.renderAll();
   }
 
   resetWalls() {
-    this.deletePointsAndPolygon();
+    //this.deletePointsAndPolygon();
+    this.canvas.clear();
     this.createDefaultWalls();
     this.createPoints();
     this.canvas.renderAll();
   }
 
+// Save the layout to the database
   saveLayout() {
     this.layoutEdited = false;
-    const jsonString = JSON.stringify(this.canvas.toJSON(['id', 'snapAngle']));
-    this.canvas.forEachObject(function (objGroup) {
-      //only if the id property exists, we are dealing with a table
-      if (objGroup.id) {
-        console.log(objGroup.id);
-        //store values originX and originY were stored to
+    const jsonString = JSON.stringify(this.canvas.toJSON());
+    this.canvas.forEachObject((objGroup) => {
+      const objGroupId = objGroup.get('id');
+      if (objGroupId) {
+        console.log(objGroupId);
         const prevOriginX = objGroup.originX;
         const prevOriginY = objGroup.originY;
-        //set originX and originY to center so that left and top properties refer to center of objGroup
         objGroup.originX = 'center';
         objGroup.originY = 'center';
         const coords = new CenterCoordinates(objGroup.left, objGroup.top);
-        layoutRef.tableService.setTableCoordinates(objGroup.id, coords).subscribe(
-          () => console.log(`successfully saved coordinates for objGroup w/ ID ${objGroup.id}`),
-          () => console.error(`could not save coordinates for objGroup w/ ID ${objGroup.id}`)
-        );
+        layoutRef.tableService.setTableCoordinates(objGroupId, coords).subscribe({
+          next: () => console.log(`Coordinates saved for table with ID ${objGroupId}`),
+          error: () => console.error(`Failed to save coordinates for table with ID ${objGroupId}`),
+        });
         objGroup.originX = prevOriginX;
         objGroup.originY = prevOriginY;
       }
     });
-    if (!this.layoutLoaded) {
-      this.layoutService.createLayout(new FloorLayout(1, jsonString)).subscribe(
-        () => {
-          console.log('Layout saved successfully!');
-          console.log(JSON.parse(jsonString));
-        },
-        error => {
-          console.error('Layout could not be saved!');
-          this.alertService.error(error);
-        }
-      );
-    } else {
-      this.layoutService.updateLayout(new FloorLayout(1, jsonString)).subscribe(
-        () => {
-          console.log('Layout updated successfully!');
-        },
-        error => {
-          console.error('Layout could not be updated!');
-        }
-      );
-    }
+
+    const layoutObservable = this.layoutLoaded
+      ? this.layoutService.updateLayout(new FloorLayout(1, jsonString))
+      : this.layoutService.createLayout(new FloorLayout(1, jsonString));
+
+    layoutObservable.subscribe(
+      () => console.log('Layout saved/updated successfully!'),
+      (error) => {
+        console.error('Layout save/update failed!');
+        this.alertService.error(error);
+      }
+    );
   }
 
+// Load the layout from the database
   loadLayout() {
-    this.layoutService.getLayoutWithId(1).subscribe(
-      data => {
+    this.layoutService.getLayoutWithId(1).subscribe({
+      next: (data) => {
         console.log('Layout loaded successfully!');
         this.layoutLoaded = true;
+        console.log(data.serializedLayout);
         this.canvas.loadFromJSON(data.serializedLayout, () => {
           this.setWalls();
           this.checkForDeletedTables();
           this.checkForNewTables();
-          let ref = this;
           if (this.authService.isAdmin()) {
             this.unlockLayout();
           } else {
             this.lockLayout();
           }
-          if (!this.locked) {
-            console.log(this.canvas.toJSON(['id', 'snapAngle']));
-          }
-          this.canvas.forEachObject(function (objGroup) {
-            if (objGroup.id) {
-              if (!ref.locked) {
-                objGroup.on('mousedown', function () {
-                  ref.setClickedTable(objGroup);
-                  ref.layoutEdited = true;
-                });
-              }
-              ref.updateTableObjGroup(objGroup);
+          this.canvas.forEachObject((objGroup) => {
+            const objGroupId = objGroup.get('id');
+            console.log(`objGroupId: ${objGroupId}`);
+            if (objGroupId) {
+              objGroup.on('mousedown', () => {
+                this.setClickedTable(objGroup);
+                this.layoutEdited = true;
+              });
+              this.updateTableObjGroup(objGroup);
             }
           });
           this.canvas.renderAll();
           this.saveLayout();
         });
       },
-      error => {
-        console.log('There is no layout saved in the database!');
+      error: () => {
+        console.log('No layout found. Creating default layout.');
         this.createDefaultWalls();
         this.createTableObjGroups(this.tableList);
         if (this.authService.isAdmin()) {
@@ -550,37 +620,31 @@ export class FloorLayoutComponent implements OnInit {
         } else {
           this.lockLayout();
         }
-        this.canvas.forEachObject(function (objGroup) {
-          if (objGroup.id) {
-            objGroup.on('mousedown', function () {
-              layoutRef.setClickedTable(objGroup);
-              layoutRef.layoutEdited = true;
-            });
-            layoutRef.updateTableObjGroup(objGroup);
-          }
-        });
         this.canvas.renderAll();
         this.saveLayout();
-      }
-    );
+      },
+    });
   }
 
+// Lock layout to prevent editing
   lockLayout() {
     this.locked = true;
     this.canvas.discardActiveObject();
-    this.canvas.forEachObject(function (objGroup) {
+    this.canvas.forEachObject((objGroup) => {
       objGroup.selectable = false;
     });
     this.canvas.renderAll();
   }
 
+// Unlock layout for editing
   unlockLayout() {
     this.locked = false;
-    this.canvas.forEachObject(function (objGroup) {
+    this.canvas.forEachObject((objGroup) => {
       objGroup.selectable = true;
     });
     this.canvas.renderAll();
   }
+
 
   checkForNewTables(): void {
     this.tableList.length;
@@ -596,9 +660,10 @@ export class FloorLayoutComponent implements OnInit {
   checkForDeletedTables(): void {
     this.canvas.forEachObject((objGroup) => {
       //only if the id property exists, we are dealing with a table
-      if (objGroup.id) {
-        if (!this.tableList.find(table => table.id == objGroup.id)) {
-          this.removeObjGroupFromLayoutById(objGroup.id);
+      const objGroupId = objGroup.get('id');
+      if (objGroupId) {
+        if (!this.tableList.find(table => table.id == objGroupId)) {
+          this.removeObjGroupFromLayoutById(objGroupId);
         }
       }
     });
@@ -650,8 +715,8 @@ export class FloorLayoutComponent implements OnInit {
 
   public deleteTable(table: Table) {
     let startDate = this.timeUtilsService.getCurrentLocalTimeAsIsoString();
-    this.reservationService.filterReservations(null, startDate, new Date(2099, 12, 31).toISOString(), table.tableNum.toString()).subscribe(
-      reservations => {
+    this.reservationService.filterReservations(null, startDate, new Date(2099, 12, 31).toISOString(), table.tableNum.toString()).subscribe({
+      next: (reservations) => {
         //open delete table form
         const modalRef = this.modalService.open(TableDeleteComponent);
         modalRef.componentInstance.table = table;
@@ -663,17 +728,17 @@ export class FloorLayoutComponent implements OnInit {
           this.loadLayout();
         });
       },
-      error => {
+      error: (error) => {
         this.alertService.error(error);
       }
-    );
+    });
   }
 
   private removeObjGroupFromLayoutById(id: number): void {
     let canvasObjects = this.canvas._objects;
     let index;
     for (let i = 0; i < canvasObjects.length; i++) {
-      if (canvasObjects[i].id === id) {
+      if (canvasObjects[i].get('id') === id) {
         index = i;
       }
     }
@@ -685,7 +750,7 @@ export class FloorLayoutComponent implements OnInit {
   }
 
 
-  private openAddTableForm() {
+  protected openAddTableForm() {
     const modalRef = this.modalService.open(TableAddComponent);
     modalRef.result.then(() => {
       this.loadTables();
@@ -694,8 +759,8 @@ export class FloorLayoutComponent implements OnInit {
 
   private deactivateTable(table: Table) {
     let startDate = this.timeUtilsService.getCurrentLocalTimeAsIsoString();
-    this.reservationService.filterReservations(null, startDate, new Date(2099, 12, 31).toISOString(), table.tableNum.toString()).subscribe(
-      reservations => {
+    this.reservationService.filterReservations(null, startDate, new Date(2099, 12, 31).toISOString(), table.tableNum.toString()).subscribe({
+      next: (reservations) => {
         if (reservations.length > 0) {
           const modalRef = this.modalService.open(TableDeactivateComponent);
           modalRef.componentInstance.table = table;
@@ -714,23 +779,22 @@ export class FloorLayoutComponent implements OnInit {
           );
         }
       },
-      error => {
+      error: (error) => {
         this.alertService.error(error);
       }
-    );
+    });
   }
 
   public setTableActive(table: Table, active: boolean) {
     this.alertService.vanishAll();
-    this.tableService.setTableActive(table.id, active).subscribe(
-      () => {
-
+    this.tableService.setTableActive(table.id, active).subscribe({
+      next: () => {
       },
-      error => {
+      error: (error) => {
         if (error.status === 409) this.alertService.reportError(`Could not deactivate table ${table.tableNum}: there are reservations for it in the future!`);
         else this.alertService.error(error);
       }
-    );
+    });
   }
 
   public selectTable(table: Table) {

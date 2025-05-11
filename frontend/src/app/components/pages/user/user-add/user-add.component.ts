@@ -1,13 +1,19 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ApplicationUserService} from '../../../../services/application-user.service';
 import {AlertService} from '../../../../services/alert.service';
 import {ApplicationUser} from '../../../../dtos/application-user';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-user-add',
   templateUrl: './user-add.component.html',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgIf
+  ],
   styleUrls: ['./user-add.component.scss']
 })
 export class UserAddComponent implements OnInit {

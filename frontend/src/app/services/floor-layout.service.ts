@@ -16,6 +16,7 @@ export class FloorLayoutService {
    * Loads the layout with the id from the backend
    * @param id of the layout to load
    */
+
   public getLayoutWithId(id: number): Observable<FloorLayout> {
     console.log("Get layout with id " + id);
     return this.httpClient.get<FloorLayout>(this.layoutBaseUri + '/' + id);

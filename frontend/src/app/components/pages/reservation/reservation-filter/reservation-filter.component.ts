@@ -4,18 +4,20 @@ import {Reservation} from '../../../../dtos/reservation';
 import {ReservationService} from '../../../../services/reservation.service';
 import {AlertService} from '../../../../services/alert.service';
 import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
-import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, ModalDismissReasons, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import { ReservationAddComponent } from '../reservation-add/reservation-add.component';
 import { ReservationEditComponent } from '../reservation-edit/reservation-edit.component';
 import { ReservationDeleteComponent } from '../reservation-delete/reservation-delete.component';
-import { formatDate } from '@angular/common';
+import {AsyncPipe, DatePipe, formatDate, NgForOf, NgIf} from '@angular/common';
 import {FloorLayoutService} from '../../../../services/floor-layout.service';
 import { TableService } from '../../../../services/table.service';
-import {fabric} from 'fabric';
+import * as fabric from 'fabric';
 import {Table} from '../../../../dtos/table';
 import { TimeUtilsService } from 'src/app/services/time-utils.service';
 import { BillingAddComponent } from '../../billing/billing-add/billing-add.component';
 import { ReservationFinishComponent } from '../reservation-finish/reservation-finish.component';
+import {TimeSelectorComponent} from '../../../time-selector/time-selector.component';
+import {DateSelectorComponent} from '../../../date-selector/date-selector.component';
 
 // [guestName, startDateTime, endDateTime, tableNum]
 type filterParamsTuple = [string, string, string, string];
@@ -23,6 +25,16 @@ type filterParamsTuple = [string, string, string, string];
 @Component({
   selector: 'app-reservation-filter',
   templateUrl: './reservation-filter.component.html',
+  standalone: true,
+  imports: [
+    TimeSelectorComponent,
+    DateSelectorComponent,
+    AsyncPipe,
+    DatePipe,
+    NgIf,
+    NgbTooltip,
+    NgForOf
+  ],
   styleUrls: ['./reservation-filter.component.scss']
 })
 export class ReservationFilterComponent implements OnInit {
@@ -34,7 +46,7 @@ export class ReservationFilterComponent implements OnInit {
   endDate: string;
   endTime: string;
 
-  private filterParams = new Subject<filterParamsTuple>();
+  protected filterParams = new Subject<filterParamsTuple>();
 
   // variables for floorplan
   canvas;
@@ -307,7 +319,7 @@ export class ReservationFilterComponent implements OnInit {
     });
   }
 
-  openReservationAddForm() {
+  openReservationAddForm($event: MouseEvent) {
 
     console.log('openReservationAddForm');
 

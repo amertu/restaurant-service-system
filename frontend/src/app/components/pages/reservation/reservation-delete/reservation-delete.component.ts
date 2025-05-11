@@ -7,6 +7,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-reservation-delete',
   templateUrl: './reservation-delete.component.html',
+  standalone: true,
   styleUrls: ['./reservation-delete.component.scss']
 })
 export class ReservationDeleteComponent implements OnInit {

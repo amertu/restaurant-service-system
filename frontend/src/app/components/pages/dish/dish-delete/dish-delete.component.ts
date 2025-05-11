@@ -6,6 +6,7 @@ import {AlertService} from '../../../../services/alert.service';
 @Component({
   selector: 'app-dish-delete',
   templateUrl: './dish-delete.component.html',
+  standalone: true,
   styleUrls: ['./dish-delete.component.scss']
 })
 export class DishDeleteComponent implements OnInit {

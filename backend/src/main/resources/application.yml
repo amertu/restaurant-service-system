@@ -1,27 +1,30 @@
 logging:
   file.name: ./log/backend.log
   level:
+    org.springframework.web: DEBUG
     root: INFO
 
 spring:
   datasource:
-    url: jdbc:h2:file:./database/db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: admin
-    password: password
+    url: ${JDBC_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${POSTGRES_USER}                                    #
+    password: ${POSTGRES_PASSWORD}
   jpa:
-    # Set this property to true if you want to see the executed queries
-    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
     hibernate:
-      ddl-auto: update
-    # Allows to fetch lazy properties outside of the original transaction. Although this sounds helpful, the property
-    # is disabled since it breaks the principle of least astonishment and leads to bad performance. The learn more,
-    # follow this link: https://bit.ly/2LaX9ku
+      ddl-auto: create
     open-in-view: false
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_batch_fetch_size: 16
+        jdbc:
+          lob:
+            non_contextual_creation: true
 
 security:
   auth:
@@ -38,8 +41,6 @@ security:
       - /swagger-resources/**
       - /webjars/**
       - /swagger-ui.html
-      # H2
-      - /h2-console/**
   jwt:
     # Use http://www.allkeysgenerator.com/ to generate secrets
     secret: ?E(H+MbQeThWmZq4t7w!z%C*F-J@NcRfUjXn2r5u8x/A?D(G+KbPdSgVkYp3s6v9

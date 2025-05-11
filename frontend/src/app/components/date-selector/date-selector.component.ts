@@ -7,15 +7,20 @@ import {
   Output,
   Input
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import {FormControl, FormsModule} from '@angular/forms';
 import { timer } from 'rxjs/internal/observable/timer';
 
-import {NgbDateStruct, NgbDate, NgbCalendar} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDateStruct, NgbDate, NgbCalendar, NgbInputDatepicker} from '@ng-bootstrap/ng-bootstrap';
 import { getLocaleMonthNames } from '@angular/common';
 
 @Component({
   selector: 'app-date-selector',
   templateUrl: './date-selector.component.html',
+  standalone: true,
+  imports: [
+    NgbInputDatepicker,
+    FormsModule
+  ],
   styleUrls: ['./date-selector.component.scss']
 })
 export class DateSelectorComponent implements OnInit {

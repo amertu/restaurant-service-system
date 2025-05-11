@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AlertContentForNgbModalComponent } from './alert-content-for-ngb-modal.component';
 
@@ -6,7 +6,7 @@ describe('AlertContentForNgbModalComponent', () => {
   let component: AlertContentForNgbModalComponent;
   let fixture: ComponentFixture<AlertContentForNgbModalComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ AlertContentForNgbModalComponent ]
     })

@@ -4,10 +4,15 @@ import {Bill} from '../../../dtos/bill';
 import {BillService} from '../../../services/bill.service';
 import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { BillingAddComponent } from './billing-add/billing-add.component';
+import {DatePipe} from '@angular/common';
 
 @Component({
   selector: 'app-billing',
   templateUrl: './billing.component.html',
+  standalone: true,
+  imports: [
+    DatePipe
+  ],
   styleUrls: ['./billing.component.scss']
 })
 export class BillingComponent implements OnInit {

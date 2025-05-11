@@ -9,6 +9,7 @@ import { TimeUtilsService } from 'src/app/services/time-utils.service';
 @Component({
   selector: 'app-reservation-finish',
   templateUrl: './reservation-finish.component.html',
+  standalone: true,
   styleUrls: ['./reservation-finish.component.css']
 })
 export class ReservationFinishComponent implements OnInit {

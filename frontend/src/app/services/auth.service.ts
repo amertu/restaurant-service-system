@@ -3,9 +3,8 @@ import {AuthRequest} from '../dtos/auth-request';
 import {Observable} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {tap} from 'rxjs/operators';
-import * as jwt_decode from 'jwt-decode';
 import {Globals} from '../global/globals';
-
+import {jwtDecode, JwtPayload} from 'jwt-decode';
 @Injectable({
   providedIn: 'root'
 })
@@ -28,7 +27,9 @@ export class AuthService {
       );
   }
 
-
+  private setToken(authResponse: string) {
+    localStorage.setItem('authToken', authResponse);
+  }
   /**
    * Check if a valid JWT token is saved in the localStorage
    */
@@ -52,16 +53,24 @@ export class AuthService {
   /**
    * Returns the user role based on the current token
    */
-  getUserRole() {
-    if (this.getToken() != null) {
-      const decoded: any = jwt_decode(this.getToken());
-      const authInfo: string[] = decoded.rol;
-      if (authInfo.includes('ROLE_ADMIN')) {
-        return 'ADMIN';
-      } else if (authInfo.includes('ROLE_USER')) {
-        return 'USER';
+  getUserRole(): string {
+    const token = this.getToken();
+
+    if (token) {
+      try {
+        const decoded = jwtDecode<CustomJwtPayload>(token);
+        const roles = decoded.rol;
+
+        if (roles?.includes('ROLE_ADMIN')) {
+          return 'ADMIN';
+        } else if (roles?.includes('ROLE_USER')) {
+          return 'USER';
+        }
+      } catch (err) {
+        console.error('Invalid JWT:', err);
       }
     }
+
     return 'UNDEFINED';
   }
 
@@ -74,20 +83,24 @@ export class AuthService {
     }
   }
 
-  private setToken(authResponse: string) {
-    localStorage.setItem('authToken', authResponse);
-  }
+  private getTokenExpirationDate(token: string): Date | null {
+    try {
+      const decoded: JwtPayload = jwtDecode<JwtPayload>(token);
 
-  private getTokenExpirationDate(token: string): Date {
+      if (decoded.exp === undefined) {
+        return null;
+      }
 
-    const decoded: any = jwt_decode(token);
-    if (decoded.exp === undefined) {
+      const date = new Date(0);
+      date.setUTCSeconds(decoded.exp);
+      return date;
+    } catch (error) {
+      console.error('Invalid JWT token:', error);
       return null;
     }
-
-    const date = new Date(0);
-    date.setUTCSeconds(decoded.exp);
-    return date;
   }
 
+}
+interface CustomJwtPayload extends JwtPayload {
+  rol: string[];
 }

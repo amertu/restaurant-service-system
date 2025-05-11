@@ -1,15 +1,21 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService} from '../../../../services/auth.service';
 import {AlertService} from '../../../../services/alert.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ApplicationUserService} from '../../../../services/application-user.service';
 import {ApplicationUser} from '../../../../dtos/application-user';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-password-reset',
   templateUrl: './password-reset.component.html',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgIf
+  ],
   styleUrls: ['./password-reset.component.scss']
 })
 export class PasswordResetComponent implements OnInit, OnChanges {

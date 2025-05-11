@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BillingComponent } from './billing.component';
 
@@ -6,7 +6,7 @@ describe('BillingComponent', () => {
   let component: BillingComponent;
   let fixture: ComponentFixture<BillingComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ BillingComponent ]
     })

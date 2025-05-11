@@ -3,17 +3,20 @@ import { Reservation } from 'src/app/dtos/reservation';
 import { TableService } from 'src/app/services/table.service';
 import { AlertService } from 'src/app/services/alert.service';
 import { Table } from 'src/app/dtos/table';
-import { FormBuilder, Validators, FormGroup } from '@angular/forms';
+import {FormBuilder, Validators, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import { ReservationService } from 'src/app/services/reservation.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { fabric } from 'fabric';
+import * as fabric from 'fabric';
 import { FloorLayoutService } from '../../../../services/floor-layout.service';
 import { TimeUtilsService } from 'src/app/services/time-utils.service';
 import { timer } from 'rxjs/internal/observable/timer';
+import {DateSelectorComponent} from '../../../date-selector/date-selector.component';
+import {TimeSelectorComponent} from '../../../time-selector/time-selector.component';
+import {NgIf} from '@angular/common';
 
 
 
-enum ReservationFormType {
+export enum ReservationFormType {
   add = 'Add',
   edit = 'Edit',
   details = 'Details'
@@ -25,6 +28,13 @@ let component;
 @Component({
   selector: 'app-reservation-form',
   templateUrl: './reservation-form.component.html',
+  standalone: true,
+  imports: [
+    DateSelectorComponent,
+    TimeSelectorComponent,
+    ReactiveFormsModule,
+    NgIf
+  ],
   styleUrls: ['./reservation-form.component.scss']
 })
 export class ReservationFormComponent implements OnInit, OnChanges {
@@ -274,21 +284,38 @@ export class ReservationFormComponent implements OnInit, OnChanges {
 
   private initReservationFormGroup() {
     this.reservationForm = this.formBuilder.group({
-      guestName: [this.initialReservation.guestName, Validators.required],
-      numberOfGuests: [this.initialReservation.numberOfGuests, Validators.required],
-      contactInformation: [this.initialReservation.contactInformation],
-      comment: [this.initialReservation.comment],
-      dateAsString: [this.initialReservation.startDateTime.substring(0, 10), Validators.required],
-      startTime: [this.initialReservation.startDateTime.substring(11, 16), Validators.required],
-      endTime: [this.initialReservation.endDateTime.substring(11, 16), Validators.required]
+      guestName: [
+        this.initialReservation?.guestName || '',
+        [Validators.required, Validators.maxLength(100)]
+      ],
+      numberOfGuests: [
+        this.initialReservation?.numberOfGuests || 1,
+        [Validators.required, Validators.min(1)]
+      ],
+      contactInformation: [
+        this.initialReservation?.contactInformation || '',
+        [Validators.required, Validators.maxLength(100)]
+      ],
+      comment: [
+        this.initialReservation?.comment || '',
+        [Validators.maxLength(250)]
+      ],
+      dateAsString: [
+        this.initialReservation?.startDateTime?.substring(0, 10) || '',
+        [Validators.required]
+      ],
+      startTime: [
+        this.initialReservation?.startDateTime?.substring(11, 16) || '',
+        [Validators.required]
+      ],
+      endTime: [
+        this.initialReservation?.endDateTime?.substring(11, 16) || '',
+        [Validators.required]
+      ]
     });
 
-    this.lastValidEndTime = this.initialReservation.endDateTime.substring(11, 16);
-
-    if (this.type === ReservationFormType.details) {
-      this.reservationForm.disable();
-    }
-
+    this.lastValidEndTime = this.reservationForm.controls.endTime.value;
+    this.tableSelection = this.initialReservation?.restaurantTables || [];
   }
 
   private initTableSelectionForEditForm() {
@@ -482,7 +509,7 @@ export class ReservationFormComponent implements OnInit, OnChanges {
     this.canvas.renderAll();
   }
 
-  private getStringForSelectedTables() {
+  protected getStringForSelectedTables() {
     if (!this.tableSelection || this.tableSelection.length < 1) return 'none';
     return `${this.tableSelection.reduce((a, b) => a + ", " + b.tableNum, "").slice(2)}`;
   }

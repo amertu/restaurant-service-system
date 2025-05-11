@@ -2,10 +2,22 @@ import { Component, OnInit, Input } from '@angular/core';
 import {AlertService} from '../../../services/alert.service';
 import {DishService} from '../../../services/dish.service';
 import {Dish} from '../../../dtos/dish';
+import {DishEditComponent} from './dish-edit/dish-edit.component';
+import {DishDeleteComponent} from './dish-delete/dish-delete.component';
+import {DishAddComponent} from './dish-add/dish-add.component';
+import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-dish-list',
   templateUrl: './dish.component.html',
+  standalone: true,
+  imports: [
+    DishEditComponent,
+    DishDeleteComponent,
+    DishAddComponent,
+    NgForOf,
+    NgIf
+  ],
   styleUrls: ['./dish.component.scss']
 })
 export class DishComponent implements OnInit {

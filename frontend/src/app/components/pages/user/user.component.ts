@@ -9,10 +9,16 @@ import {UserAddComponent} from './user-add/user-add.component';
 import {UserEditComponent} from './user-edit/user-edit.component';
 import {UserDeleteComponent} from './user-delete/user-delete.component';
 import {PasswordResetComponent} from './password-reset/password-reset.component';
+import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
+  standalone: true,
+  imports: [
+    NgForOf,
+    NgIf
+  ],
   styleUrls: ['./user.component.scss']
 })
 export class UserComponent implements OnInit {

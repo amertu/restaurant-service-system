@@ -1,17 +1,21 @@
 import {Component, Input, OnInit, OnChanges} from '@angular/core';
-import {Validators, FormBuilder} from '@angular/forms';
+import {Validators, FormBuilder, ReactiveFormsModule, FormGroup, FormControl} from '@angular/forms';
 import {TableService} from '../../../../../services/table.service';
 import {AlertService} from '../../../../../services/alert.service';
 import {Table} from 'src/app/dtos/table';
-import { ActivatedRoute } from '@angular/router';
-import {AuthService} from '../../../../../services/auth.service';
-import {FloorLayout} from '../../../../../dtos/floor-layout';
+import {ActivatedRoute} from '@angular/router';
 import {FloorLayoutService} from '../../../../../services/floor-layout.service';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-table-edit',
   templateUrl: './table-edit.component.html',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgIf
+  ],
   styleUrls: ['./table-edit.component.scss']
 })
 export class TableEditComponent implements OnInit, OnChanges {
@@ -21,15 +25,23 @@ export class TableEditComponent implements OnInit, OnChanges {
 
   constructor(private tableService: TableService,
               private alertService: AlertService, private route: ActivatedRoute, private formBuilder: FormBuilder,
-              private layoutService: FloorLayoutService, public activeModal: NgbActiveModal) { }
+              private layoutService: FloorLayoutService, public activeModal: NgbActiveModal) {
+  }
 
-  tableForm = this.formBuilder.group({
-    id: null,
-    tableNum: [Validators.required, Validators.min(1)],
-    seatCount: [Validators.required, Validators.min(1)],
-    posDescription: [''],
-    active: [true, Validators.required]
+  tableForm: FormGroup<{
+    id: FormControl<number | null>;
+    tableNum: FormControl<number>;
+    seatCount: FormControl<number>;
+    posDescription: FormControl<string>;
+    active: FormControl<boolean>;
+  }> = this.formBuilder.group({
+    id: this.formBuilder.control<number | null>(null),
+    tableNum: this.formBuilder.control<number>(1, [Validators.required, Validators.min(1)]),
+    seatCount: this.formBuilder.control<number>(1, [Validators.required, Validators.min(1)]),
+    posDescription: this.formBuilder.control<string>('', []),
+    active: this.formBuilder.control<boolean>(true, Validators.required),
   });
+
 
   ngOnInit(): void {
     this.initTableFormGroup();
@@ -41,17 +53,27 @@ export class TableEditComponent implements OnInit, OnChanges {
     this.loadAllTables();
   }
 
+  private initTableFormGroup() {
+    this.tableForm.setValue({
+      id: this.table.id,
+      tableNum: this.table.tableNum,
+      seatCount: this.table.seatCount,
+      posDescription: this.table.posDescription || '',
+      active: this.table.active
+    });
+  }
+
   public loadAllTables() {
     console.log('loadAllTables()');
-    this.tableService.getAllTables().subscribe(
-      (tables: Table[]) => {
+    this.tableService.getAllTables().subscribe({
+      next: (tables: Table[]) => {
         this.tables = tables;
       },
-      error => {
+      error: (error) => {
         console.log('Failed to load tables.');
         this.alertService.error(error);
       }
-    );
+    });
   }
 
   tableNumOverlapping(): boolean {
@@ -63,27 +85,26 @@ export class TableEditComponent implements OnInit, OnChanges {
     return false;
   }
 
-  onSubmitUpdate() {
+  onSubmitUpdate(): void {
     this.submitted = true;
-    console.log(this.tableForm.value);
-    if (this.tableForm.valid && !this.tableNumOverlapping()) {
-      this.tableService.updateTable(this.tableForm.value).subscribe(
-        () => {
-            this.activeModal.close();
-        },
-        error => {
-          this.alertService.error(error);
-        });
+    if (this.tableForm.invalid || this.tableNumOverlapping()) {
+      return;
+    }
+    const updatedTable: Table = {
+      ...this.table,
+      ...this.tableForm.value
     };
-  }
 
-  private initTableFormGroup() {
-    this.tableForm = this.formBuilder.group({
-      id: [this.table.id],
-      tableNum: [this.table.tableNum, [Validators.required, Validators.min(1)]],
-      seatCount: [this.table.seatCount, [Validators.required, Validators.min(1)]],
-      posDescription: [this.table.posDescription],
-      active: [this.table.active, Validators.required]
+    this.tableService.updateTable(updatedTable).subscribe({
+      next: (response) => {
+        console.log('Table updated successfully:', response);
+        this.alertService.reportSuccessModal('Successfully updated table.');
+        this.activeModal.close();
+      },
+      error: (error) => {
+        console.error('Error updating table:', error);
+        this.alertService.reportErrorModal(error);
+      }
     });
   }
 }

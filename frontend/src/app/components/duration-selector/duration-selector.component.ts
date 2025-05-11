@@ -1,9 +1,14 @@
 import { Component, OnInit, Output, Input, EventEmitter, OnChanges } from '@angular/core';
 import { timer } from 'rxjs';
+import {NgbRating} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-duration-selector',
   templateUrl: './duration-selector.component.html',
+  standalone: true,
+  imports: [
+    NgbRating
+  ],
   styleUrls: ['./duration-selector.component.scss']
 })
 export class DurationSelectorComponent implements OnInit, OnChanges {
