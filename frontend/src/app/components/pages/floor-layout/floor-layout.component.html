@@ -1,4 +1,5 @@
 <h1 style="margin-top: 1rem">Floorplan</h1>
+<!--
 <div *ngIf="authService.isLoggedIn() && authService.isAdmin()" class="container mt-3">
   <div class="row">
     <button class="btn" (click)="editWalls()">
@@ -27,13 +28,16 @@
     <br>
   </span>
 </div>
+-->
 
-<div class="container mt-3 canvasContainer">
-  <canvas id="c"></canvas>
-</div>
+<canvas #canvasEl></canvas>
 
-<app-table [tables]="tableList" (updateTables)="onUpdateTables($event)"></app-table>
 
+
+
+<app-table [tables]="tables" (updateTables)="onUpdateTables($event)"></app-table>
+
+<!--
 <div class="modal fade resetWallsModal" tabindex="-1" role="dialog" aria-labelledby="Reset walls modal"
      aria-hidden="true">
   <div class="modal-dialog modal-md">
@@ -54,3 +58,4 @@
     </div>
   </div>
 </div>
+-->

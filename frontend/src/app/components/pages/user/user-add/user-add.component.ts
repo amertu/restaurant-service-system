@@ -1,9 +1,18 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import {ApplicationUserService} from '../../../../services/application-user.service';
 import {AlertService} from '../../../../services/alert.service';
 import {ApplicationUser} from '../../../../dtos/application-user';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {NgIf} from '@angular/common';
 
 @Component({
@@ -18,6 +27,7 @@ import {NgIf} from '@angular/common';
 })
 export class UserAddComponent implements OnInit {
   submitted: boolean = false;
+  protected addUserForm: FormGroup;
 
   constructor(private formBuilder: FormBuilder,
               private applicationUserService: ApplicationUserService,
@@ -25,47 +35,90 @@ export class UserAddComponent implements OnInit {
               public activeModal: NgbActiveModal) {
   }
 
-  addForm = this.formBuilder.group({
-    firstName: ['', [Validators.required]],
-    lastName: ['', [Validators.required]],
-    ssnr: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
-    admin: [false, [Validators.required]],
-    email: ['', [Validators.required, Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
-    repeatPassword: ['', [Validators.required]]
-  }, {
-    validator: [this.checkPasswords('password', 'repeatPassword'), this.checkSSNR('ssnr')]
-  });
-
   ngOnInit(): void {
+    this.initAddUserForm();
   }
+
+  private initAddUserForm() {
+    this.addUserForm = this.formBuilder.group<{
+      firstName: FormControl<string>;
+      lastName: FormControl<string>;
+      ssnr: FormControl<string>;
+      admin: FormControl<boolean>;
+      email: FormControl<string>;
+      password: FormControl<string>;
+      repeatPassword: FormControl<string>;
+    }>({
+      firstName: this.formBuilder.control<string>('', [Validators.required]),
+      lastName: this.formBuilder.control<string>('', [Validators.required]),
+      ssnr: this.formBuilder.control<string>('', [
+        Validators.required,
+        Validators.pattern('^[0-9]{10}$')
+      ]),
+      admin: this.formBuilder.control<boolean>(false, [Validators.required]),
+      email: this.formBuilder.control<string>('', [
+        Validators.required,
+        Validators.email,
+        Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')
+      ]),
+      password: this.formBuilder.control<string>('', [
+        Validators.required,
+        Validators.minLength(8)
+      ]),
+      repeatPassword: this.formBuilder.control<string>('', [Validators.required])
+    }, {
+      validators: [this.checkPasswords('password', 'repeatPassword'), this.checkSSNR('ssnr')]
+    });
+  }
+
 
   /**
    * check if the two password entries match
-   * @param password the first password entry
-   * @param repeatPassword the second password entry
+   * @param passwordKey
+   * @param repeatPasswordKey
    */
-  checkPasswords(password: string, repeatPassword: string) {
-    return (formGroup: FormGroup) => {
-      const pass = formGroup.controls[password];
-      const repeat = formGroup.controls[repeatPassword];
+  checkPasswords(passwordKey: string, repeatPasswordKey: string): ValidatorFn {
+    return (formGroup: AbstractControl): ValidationErrors | null => {
+      const password = formGroup.get(passwordKey)?.value;
+      const repeatPassword = formGroup.get(repeatPasswordKey)?.value;
 
-      if (repeat.errors && !repeat.errors.notSame) {
-        return;
+      if (password !== repeatPassword) {
+        return {passwordMismatch: true};
       }
-      return pass.value !== repeat.value ? repeat.setErrors({notSame: true}) : repeat.setErrors(null);
+      return null;
     };
   }
 
-  checkSSNR(ssnr: string) {
-    return (formGroup: FormGroup) => {
-      const nr = formGroup.controls[ssnr];
-      if (nr.errors && !nr.errors.invalidSSNR) {
-        return;
+  checkSSNR(controlName: string): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const formGroup = control as FormGroup;
+      const ssnrControl = formGroup.controls[controlName];
+
+      if (!ssnrControl) {
+        return null;
       }
-      return this.isInvalidSSNR(nr.value) ? nr.setErrors({invalidSSNR: true}) : nr.setErrors(null);
+
+      const value = ssnrControl.value;
+      const isInvalid: boolean = this.isInvalidSSNR(value);
+
+      // Preserve other errors, don't overwrite them
+      const currentErrors = ssnrControl.errors || {};
+
+      if (isInvalid) {
+        if (!currentErrors['invalidSSNR']) {
+          ssnrControl.setErrors({...currentErrors, invalidSSNR: true});
+        }
+      } else {
+        if (currentErrors['invalidSSNR']) {
+          delete currentErrors['invalidSSNR'];
+          ssnrControl.setErrors(Object.keys(currentErrors).length ? currentErrors : null);
+        }
+      }
+
+      return null;
     };
   }
+
 
   isInvalidSSNR(ssnr: string): boolean {
     if (ssnr.charAt(0) === '0') {
@@ -78,34 +131,35 @@ export class UserAddComponent implements OnInit {
       + +(+ssnr.charAt(5)) * 8
       + +(+ssnr.charAt(6)) * 4
       + +(+ssnr.charAt(7)) * 2
-      + +(+ssnr.charAt(8)) * 1
+      + +(+ssnr.charAt(8))
       + +(+ssnr.charAt(9)) * 6) % 11;
     return checkNumber === 10 || checkNumber !== (+ssnr.charAt(3));
   }
 
   onSubmitAdd() {
     this.submitted = true;
-    if (this.addForm.valid) {
+    if (this.addUserForm.valid) {
       const userRegister: ApplicationUser = new ApplicationUser(null,
-        this.addForm.controls.email.value,
-        this.addForm.controls.password.value,
-        this.addForm.controls.firstName.value,
-        this.addForm.controls.lastName.value,
-        this.addForm.controls.ssnr.value,
-        this.addForm.controls.admin.value,
+        this.addUserForm.controls.email.value,
+        this.addUserForm.controls.password.value,
+        this.addUserForm.controls.firstName.value,
+        this.addUserForm.controls.lastName.value,
+        this.addUserForm.controls.ssnr.value,
+        this.addUserForm.controls.admin.value,
         false);
       this.save(userRegister);
     }
   }
 
   save(userRegister: ApplicationUser) {
-    this.applicationUserService.saveAsAdmin(userRegister).subscribe(() => {
-        this.alertService.reportSuccessModal('Successfully added user.')
+    this.applicationUserService.saveAsAdmin(userRegister).subscribe({
+      next: () => {
+        this.alertService.reportSuccessModal('Successfully added user.');
         this.activeModal.close();
       },
-      error => {
+      error: error => {
         this.alertService.reportErrorModal(error);
       }
-    );
+    });
   }
 }

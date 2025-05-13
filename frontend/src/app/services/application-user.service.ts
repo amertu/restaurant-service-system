@@ -10,11 +10,12 @@ import {catchError} from 'rxjs/operators';
 })
 export class ApplicationUserService {
 
-  private messageBaseUri: string = this.globals.backendUri + '/users';
+  private readonly messageBaseUri: string;
   private errorMessage: string = ' ';
 
   constructor(private httpClient: HttpClient,
               private globals: Globals) {
+    this.messageBaseUri = this.globals.backendUri + '/users';
   }
 
   /**

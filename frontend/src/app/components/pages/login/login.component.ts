@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
 import {AuthService} from '../../../services/auth.service';
 import {AuthRequest} from '../../../dtos/auth-request';
@@ -19,15 +19,24 @@ import {NgIf} from '@angular/common';
 })
 export class LoginComponent implements OnInit {
 
-  loginForm: FormGroup;
+  protected loginForm: FormGroup;
   // After first submission attempt, form validation will start
   submitted: boolean = false;
 
   constructor(private formBuilder: FormBuilder, private authService: AuthService,
-              private router: Router, private alertService: AlertService) {
-    this.loginForm = this.formBuilder.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(8)]]
+              private router: Router, private alertService: AlertService) {}
+
+  ngOnInit() {
+    this.initLoginFormGroup();
+  }
+
+  private initLoginFormGroup() {
+    this.loginForm = this.formBuilder.group<{
+      username: FormControl<string>;
+      password: FormControl<string>;
+    }>({
+      username: this.formBuilder.control<string>('', Validators.required),
+      password: this.formBuilder.control<string>('', [Validators.required, Validators.minLength(8)])
     });
   }
 
@@ -68,10 +77,6 @@ export class LoginComponent implements OnInit {
         this.alertService.error(error);
       }
     });
-  }
-
-
-  ngOnInit() {
   }
 
 }

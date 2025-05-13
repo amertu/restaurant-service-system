@@ -72,8 +72,8 @@ export class ReservationFormComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    //this.initReservationFormGroup();
-    //this.loadAllTables();
+    this.initReservationFormGroup();
+    this.loadAllTables();
   }
 
   ngOnChanges(): void {

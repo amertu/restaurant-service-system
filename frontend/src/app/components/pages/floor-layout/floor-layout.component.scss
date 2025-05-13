@@ -1,20 +1,9 @@
-$active-focused: 87%;
-$active-unfocused: 54%;
-$inactive: 38%;
-
-span button {
-  opacity: $active-unfocused;
-  &.inactive {
-    opacity: $inactive;
-  }
-
-  &:hover {
-    opacity: $active-focused;
-    transform: scale(1.35);
-  }
+canvas {
+  border: 1px solid #ccc;
+  display: block;
+  width: 800px;
+  height: 800px;
+  position: relative;
+  z-index: 1;
 }
 
-.unsaved {
-  color: red;
-  font-size: 12pt;
-}

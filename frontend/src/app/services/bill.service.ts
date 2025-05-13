@@ -10,9 +10,11 @@ import {Bill} from '../dtos/bill';
 })
 export class BillService {
 
-  private billsBaseUri: string = this.globals.backendUri + '/bills';
+  private readonly billsBaseUri: string;
 
-  constructor(private httpClient: HttpClient, private globals: Globals) { }
+  constructor(private httpClient: HttpClient, private globals: Globals) {
+    this.billsBaseUri = this.globals.backendUri + '/bills';
+  }
 
   /**
    * A method to buy dishes

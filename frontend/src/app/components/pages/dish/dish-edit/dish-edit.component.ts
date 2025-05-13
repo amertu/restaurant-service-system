@@ -24,12 +24,7 @@ export class DishEditComponent implements OnInit, OnChanges {
               private alertService: AlertService) {
   }
 
-  dishForm: FormGroup<{
-    id: FormControl<number | null>;
-    name: FormControl<string>;
-    price: FormControl<number>;
-    category: FormControl<string>;
-  }>;
+  protected dishForm: FormGroup;
 
   ngOnInit() {
     this.initDishFormGroup();
@@ -37,6 +32,20 @@ export class DishEditComponent implements OnInit, OnChanges {
 
   ngOnChanges(): void {
     this.initDishFormGroup();
+  }
+
+  private initDishFormGroup() {
+    this.dishForm = this.formBuilder.group<{
+      id: FormControl<number | null>;
+      name: FormControl<string>;
+      price: FormControl<number>;
+      category: FormControl<string>;
+    }>({
+      id: this.formBuilder.control<number | null>(this.dish.id),
+      name: this.formBuilder.control<string>(this.dish.name, Validators.required),
+      price: this.formBuilder.control<number>(this.dish.price / 100, [Validators.required, Validators.min(0)]),
+      category: this.formBuilder.control<string>(this.dish.category, Validators.required)
+    });
   }
 
   onSubmitUpdate() {
@@ -55,14 +64,4 @@ export class DishEditComponent implements OnInit, OnChanges {
         });
     }
   }
-
-  private initDishFormGroup() {
-    this.dishForm = this.formBuilder.group({
-      id: this.formBuilder.control<number | null>(this.dish.id),
-      name: this.formBuilder.control<string>(this.dish.name, Validators.required),
-      price: this.formBuilder.control<number>(this.dish.price / 100, [Validators.required, Validators.min(0)]),
-      category: this.formBuilder.control<string>(this.dish.category, Validators.required)
-    });
-  }
-
 }

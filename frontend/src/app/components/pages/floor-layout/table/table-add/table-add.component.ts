@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Validators, FormBuilder, ReactiveFormsModule} from '@angular/forms';
+import {Validators, FormBuilder, ReactiveFormsModule, FormGroup, FormControl} from '@angular/forms';
 import {TableService} from '../../../../../services/table.service';
 import {AlertService} from '../../../../../services/alert.service';
 import {Table} from '../../../../../dtos/table';
@@ -19,6 +19,7 @@ import {NgIf} from '@angular/common';
 export class TableAddComponent implements OnInit {
   submitted: boolean = false;
   tables: Table[];
+  protected tableForm: FormGroup;
 
   constructor(private formBuilder: FormBuilder,
               private tableService: TableService,
@@ -26,17 +27,27 @@ export class TableAddComponent implements OnInit {
               protected activeModal: NgbActiveModal) {
   }
 
-  tableForm = this.formBuilder.group({
-    id: null,
-    tableNum: ['', [Validators.required, Validators.min(1)]],
-    seatCount: ['', [Validators.required, Validators.min(1)]],
-    posDescription: [''],
-    active: [true, Validators.required]
-  });
-
   ngOnInit(): void {
+    this.initTableFormGroup();
     this.loadAllTables();
   }
+
+  private initTableFormGroup(): void {
+    this.tableForm = this.formBuilder.group<{
+      id: FormControl<number | null>;
+      tableNum: FormControl<number | null>;
+      seatCount: FormControl<number | null>;
+      posDescription: FormControl<string | null>;
+      active: FormControl<boolean>;
+    }>({
+      id: this.formBuilder.control<number | null>(null),
+      tableNum: this.formBuilder.control<number | null>(null, [Validators.required, Validators.min(1)]),
+      seatCount: this.formBuilder.control<number | null>(null, [Validators.required, Validators.min(1)]),
+      posDescription: this.formBuilder.control<string | null>(''),
+      active: this.formBuilder.control<boolean>(true, Validators.required)
+    });
+  }
+
 
   public loadAllTables() {
     console.log('loadAllTables()');

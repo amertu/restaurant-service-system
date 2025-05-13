@@ -16,7 +16,6 @@ export class AuthInterceptor implements HttpInterceptor {
     }
 
     const token = this.authService.getToken();
-    console.log('Token in interceptor:', token);
 
     if (token) {
       const authReq = req.clone({
@@ -24,7 +23,6 @@ export class AuthInterceptor implements HttpInterceptor {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('Request with Authorization header:', authReq);
       return next.handle(authReq);
     }
 

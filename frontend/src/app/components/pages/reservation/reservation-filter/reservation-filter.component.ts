@@ -1,21 +1,21 @@
-import { Component, OnInit } from '@angular/core';
-import {Observable, Subject, timer} from 'rxjs';
+import {Component, OnInit} from '@angular/core';
+import {Observable, Subject} from 'rxjs';
 import {Reservation} from '../../../../dtos/reservation';
 import {ReservationService} from '../../../../services/reservation.service';
 import {AlertService} from '../../../../services/alert.service';
 import {debounceTime, distinctUntilChanged, switchMap} from 'rxjs/operators';
-import {NgbModal, ModalDismissReasons, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import { ReservationAddComponent } from '../reservation-add/reservation-add.component';
-import { ReservationEditComponent } from '../reservation-edit/reservation-edit.component';
-import { ReservationDeleteComponent } from '../reservation-delete/reservation-delete.component';
-import {AsyncPipe, DatePipe, formatDate, NgForOf, NgIf} from '@angular/common';
+import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {ReservationAddComponent} from '../reservation-add/reservation-add.component';
+import {ReservationEditComponent} from '../reservation-edit/reservation-edit.component';
+import {ReservationDeleteComponent} from '../reservation-delete/reservation-delete.component';
+import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {FloorLayoutService} from '../../../../services/floor-layout.service';
-import { TableService } from '../../../../services/table.service';
+import {TableService} from '../../../../services/table.service';
 import * as fabric from 'fabric';
 import {Table} from '../../../../dtos/table';
-import { TimeUtilsService } from 'src/app/services/time-utils.service';
-import { BillingAddComponent } from '../../billing/billing-add/billing-add.component';
-import { ReservationFinishComponent } from '../reservation-finish/reservation-finish.component';
+import {TimeUtilsService} from 'src/app/services/time-utils.service';
+import {BillingAddComponent} from '../../billing/billing-add/billing-add.component';
+import {ReservationFinishComponent} from '../reservation-finish/reservation-finish.component';
 import {TimeSelectorComponent} from '../../../time-selector/time-selector.component';
 import {DateSelectorComponent} from '../../../date-selector/date-selector.component';
 
@@ -119,16 +119,14 @@ export class ReservationFilterComponent implements OnInit {
     console.log(startDate);
     this.startDate = startDate;
     this.setDisplayMSG();
-    const startDateTime = this.constructDateTimeString(this.startDate, this.startTime, this.defaultStartTime);
-    this.filterParams[1] = startDateTime;
+    this.filterParams[1] = this.constructDateTimeString(this.startDate, this.startTime, this.defaultStartTime);
     this.filter([this.filterParams[0], this.filterParams[1], this.filterParams[2], this.filterParams[3]]);
   }
 
   public onStartTimeChanged(startTime: string) {
     console.log(startTime);
     this.startTime = startTime;
-    const startDateTime = this.constructDateTimeString(this.startDate, this.startTime, this.defaultStartTime);
-    this.filterParams[1] = startDateTime;
+    this.filterParams[1] = this.constructDateTimeString(this.startDate, this.startTime, this.defaultStartTime);
     this.filter([this.filterParams[0], this.filterParams[1], this.filterParams[2], this.filterParams[3]]);
     this.setDisplayMSG();
   }
@@ -137,16 +135,14 @@ export class ReservationFilterComponent implements OnInit {
     console.log(endDate);
     this.endDate = endDate;
     this.setDisplayMSG();
-    const endDateTime = this.constructDateTimeString(this.endDate, this.endTime, this.defaultEndTime);
-    this.filterParams[2] = endDateTime;
+    this.filterParams[2] = this.constructDateTimeString(this.endDate, this.endTime, this.defaultEndTime);
     this.filter([this.filterParams[0], this.filterParams[1], this.filterParams[2], this.filterParams[3]]);
   }
 
   public onEndTimeChanged(endTime: string) {
     console.log(endTime);
     this.endTime = endTime;
-    const endDateTime = this.constructDateTimeString(this.endDate, this.endTime, this.defaultEndTime);
-    this.filterParams[2] = endDateTime;
+    this.filterParams[2] = this.constructDateTimeString(this.endDate, this.endTime, this.defaultEndTime);
     this.filter([this.filterParams[0], this.filterParams[1], this.filterParams[2], this.filterParams[3]]);
     this.setDisplayMSG();
   }

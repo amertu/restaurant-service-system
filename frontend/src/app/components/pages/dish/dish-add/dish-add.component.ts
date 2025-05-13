@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {AlertService} from '../../../../services/alert.service';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {DishService} from '../../../../services/dish.service';
 import {Dish} from '../../../../dtos/dish';
 import {NgIf} from '@angular/common';
@@ -17,18 +17,28 @@ import {NgIf} from '@angular/common';
 })
 export class DishAddComponent implements OnInit {
   submitted: boolean = false;
+  protected dishForm: FormGroup;
 
   constructor(private formBuilder: FormBuilder, private dishService: DishService, private alertService: AlertService) {
   }
 
-  dishForm = this.formBuilder.group({
-    name: ['', Validators.required],
-    price: [0, [Validators.required, Validators.min(0)]],
-    category: ['', Validators.required]
-  });
 
   ngOnInit(): void {
   }
+
+  private initDishFormGroup() {
+    this.dishForm = this.formBuilder.group<{
+      name: FormControl<string>;
+      price: FormControl<number>;
+      category: FormControl<string>;
+
+    }>({
+      name: this.formBuilder.control<string>('', [Validators.required]),
+      price: this.formBuilder.control<number>(0, [Validators.required, Validators.min(0)]),
+      category: this.formBuilder.control<string>('', [Validators.required])
+    });
+  }
+
 
   onSubmitAdd() {
     this.submitted = true;
@@ -42,13 +52,9 @@ export class DishAddComponent implements OnInit {
   }
 
   save(dish: Dish) {
-    this.dishService.createDish(dish).subscribe(
-      () => {
-        window.location.reload();
-      },
-      error => {
-        this.alertService.error(error);
-      }
-    );
+    this.dishService.createDish(dish).subscribe({
+      next: () => window.location.reload(),
+      error: (error) => this.alertService.error(error)
+    });
   }
 }

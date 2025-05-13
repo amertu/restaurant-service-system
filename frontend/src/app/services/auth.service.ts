@@ -5,15 +5,17 @@ import {HttpClient} from '@angular/common/http';
 import {tap} from 'rxjs/operators';
 import {Globals} from '../global/globals';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private authBaseUri: string = this.globals.backendUri + '/authentication';
+  private authBaseUri: string;
   email: string;
 
   constructor(private httpClient: HttpClient, private globals: Globals) {
+    this.authBaseUri = this.globals.backendUri + '/authentication';
   }
 
   /**
@@ -30,6 +32,7 @@ export class AuthService {
   private setToken(authResponse: string) {
     localStorage.setItem('authToken', authResponse);
   }
+
   /**
    * Check if a valid JWT token is saved in the localStorage
    */
@@ -101,6 +104,7 @@ export class AuthService {
   }
 
 }
+
 interface CustomJwtPayload extends JwtPayload {
   rol: string[];
 }

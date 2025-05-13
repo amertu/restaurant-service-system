@@ -9,9 +9,11 @@ import {Dish} from '../dtos/dish';
 })
 export class DishService {
 
-  private dishBaseUri: string = this.globals.backendUri + '/dishes';
+  private dishBaseUri: string;
 
-  constructor(private httpClient: HttpClient, private globals: Globals) { }
+  constructor(private httpClient: HttpClient, private globals: Globals) {
+    this.dishBaseUri = this.globals.backendUri + '/dishes';
+  }
 
   /**
    * Loads all dishes from the backend

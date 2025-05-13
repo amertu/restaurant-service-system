@@ -3,7 +3,7 @@ import {MessageService} from '../../../services/message.service';
 import {Message} from '../../../dtos/message';
 import {NgbPaginationConfig} from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService} from '../../../services/auth.service';
 import {AlertService} from '../../../services/alert.service';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
@@ -22,22 +22,31 @@ import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
   styleUrls: ['./message.component.scss']
 })
 export class MessageComponent implements OnInit {
-  messageForm: FormGroup;
+
+  protected messageForm: FormGroup;
   // After first submission attempt, form validation will start
   submitted: boolean = false;
   private message: Message[];
 
   constructor(private messageService: MessageService, private ngbPaginationConfig: NgbPaginationConfig, private formBuilder: FormBuilder,
               private cd: ChangeDetectorRef, protected authService: AuthService, private alertService: AlertService) {
-    this.messageForm = this.formBuilder.group({
-      title: ['', [Validators.required]],
-      summary: ['', [Validators.required]],
-      text: ['', [Validators.required]],
-    });
   }
 
   ngOnInit() {
+    this.initMessageFormGroup();
     this.loadMessage();
+  }
+
+  private initMessageFormGroup() {
+    this.messageForm = this.formBuilder.group<{
+      title: FormControl<string>;
+      summary: FormControl<string>;
+      text: FormControl<string>;
+    }>({
+      title: this.formBuilder.control<string>('', Validators.required),
+      summary: this.formBuilder.control<string>('', Validators.required),
+      text: this.formBuilder.control<string>('', Validators.required)
+    });
   }
 
   /**

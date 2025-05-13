@@ -11,13 +11,15 @@ import {NotificationService} from './notification.service';
 })
 export class MessageService {
 
-  private readonly messageBaseUri = `${this.globals.backendUri}/messages`;
+  private readonly messageBaseUri: string;
 
   constructor(
     private httpClient: HttpClient,
     private globals: Globals,
     private notificationService: NotificationService
-  ) {}
+  ) {
+    this.messageBaseUri = this.globals.backendUri + '/messages';
+  }
 
   /**
    * Loads all messages from the backend
@@ -58,6 +60,7 @@ export class MessageService {
       })
     );
   }
+
   /**
    * Extracts a human-readable error message from backend or default.
    */

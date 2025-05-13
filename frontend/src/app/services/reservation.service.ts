@@ -12,9 +12,11 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 export class ReservationService {
 
 
-  private reservationBaseUri: string = this.globals.backendUri + '/reservations';
+  private readonly reservationBaseUri: string;
 
-  constructor(private httpClient: HttpClient, private globals: Globals) { }
+  constructor(private httpClient: HttpClient, private globals: Globals) {
+    this.reservationBaseUri = this.globals.backendUri + '/reservations';
+  }
 
   /**
    * Loads all reservations from the backend

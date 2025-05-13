@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
-import { Globals } from '../global/globals';
-import { Observable } from 'rxjs';
-import { Table } from '../dtos/table';
-import { HttpClient } from '@angular/common/http';
-import { CenterCoordinates } from '../dtos/center-coordinates';
+import {Globals} from '../global/globals';
+import {Observable} from 'rxjs';
+import {Table} from '../dtos/table';
+import {HttpClient} from '@angular/common/http';
+import {CenterCoordinates} from '../dtos/center-coordinates';
 
 
 @Injectable({
@@ -13,9 +13,11 @@ import { CenterCoordinates } from '../dtos/center-coordinates';
 export class TableService {
 
 
-  private tableBaseUri: string = this.globals.backendUri + '/tables';
+  private tableBaseUri: string;
 
-  constructor(private httpClient: HttpClient, private globals: Globals) { }
+  constructor(private httpClient: HttpClient, private globals: Globals) {
+    this.tableBaseUri = this.globals.backendUri + '/tables';
+  }
 
   /**
    * Loads the table with the id from the backend
@@ -44,14 +46,14 @@ export class TableService {
   }
 
   /**
-     * Clones a table which is identified by its id.
-     * All properties are simply copied, with two exceptions:
-     * 1. database-generated id
-     * 2. tableNum (which is simply next available tableNum which is greater than tableNum of supplied table)
-     *
-     * @param id the id of the table to clone
-     * @return a table clone (all properties same as those of table to be cloned - exceptions: id and tableNum)
-     */
+   * Clones a table which is identified by its id.
+   * All properties are simply copied, with two exceptions:
+   * 1. database-generated id
+   * 2. tableNum (which is simply next available tableNum which is greater than tableNum of supplied table)
+   *
+   * @param id the id of the table to clone
+   * @return a table clone (all properties same as those of table to be cloned - exceptions: id and tableNum)
+   */
   public cloneTable(id: number): Observable<Table> {
     console.log('TableService: Creating table.');
     return this.httpClient.post<Table>(this.tableBaseUri + '/clone/' + id, null);
@@ -104,11 +106,11 @@ export class TableService {
    * @param startDateTime the start time of the reservation.
    * @param endDateTime the end time of the reservation.
    */
-  public getTableSuggestion( numberOfGuests: number,  idOfReservationToIgnore: string, startDateTime: string, endDateTime: string): Observable<Table[]> {
+  public getTableSuggestion(numberOfGuests: number, idOfReservationToIgnore: string, startDateTime: string, endDateTime: string): Observable<Table[]> {
     console.log('Get table suggestion.');
     return this.httpClient.get<Table[]>(this.tableBaseUri + '?numberOfGuests=' + numberOfGuests
-    + '&idOfReservationToIgnore=' + idOfReservationToIgnore
-    + '&startDateTime=' + startDateTime + '&endDateTime=' + endDateTime);
+      + '&idOfReservationToIgnore=' + idOfReservationToIgnore
+      + '&startDateTime=' + startDateTime + '&endDateTime=' + endDateTime);
   }
 
 }

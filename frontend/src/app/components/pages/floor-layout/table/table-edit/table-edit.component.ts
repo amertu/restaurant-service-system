@@ -22,25 +22,12 @@ export class TableEditComponent implements OnInit, OnChanges {
   @Input() table: Table;
   submitted: boolean = false;
   tables: Table[];
+  protected tableForm!: FormGroup;
 
   constructor(private tableService: TableService,
               private alertService: AlertService, private route: ActivatedRoute, private formBuilder: FormBuilder,
               private layoutService: FloorLayoutService, public activeModal: NgbActiveModal) {
   }
-
-  tableForm: FormGroup<{
-    id: FormControl<number | null>;
-    tableNum: FormControl<number>;
-    seatCount: FormControl<number>;
-    posDescription: FormControl<string>;
-    active: FormControl<boolean>;
-  }> = this.formBuilder.group({
-    id: this.formBuilder.control<number | null>(null),
-    tableNum: this.formBuilder.control<number>(1, [Validators.required, Validators.min(1)]),
-    seatCount: this.formBuilder.control<number>(1, [Validators.required, Validators.min(1)]),
-    posDescription: this.formBuilder.control<string>('', []),
-    active: this.formBuilder.control<boolean>(true, Validators.required),
-  });
 
 
   ngOnInit(): void {
@@ -54,6 +41,20 @@ export class TableEditComponent implements OnInit, OnChanges {
   }
 
   private initTableFormGroup() {
+    this.tableForm = this.formBuilder.group<{
+      id: FormControl<number | null>;
+      tableNum: FormControl<number>;
+      seatCount: FormControl<number>;
+      posDescription: FormControl<string>;
+      active: FormControl<boolean>;
+    }>({
+      id: this.formBuilder.control<number | null>(null),
+      tableNum: this.formBuilder.control<number>(1, [Validators.required, Validators.min(1)]),
+      seatCount: this.formBuilder.control<number>(1, [Validators.required, Validators.min(1)]),
+      posDescription: this.formBuilder.control<string>('', []),
+      active: this.formBuilder.control<boolean>(true, Validators.required),
+    });
+
     this.tableForm.setValue({
       id: this.table.id,
       tableNum: this.table.tableNum,

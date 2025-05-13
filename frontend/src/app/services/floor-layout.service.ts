@@ -1,16 +1,18 @@
-import { Injectable } from '@angular/core';
-import { Globals } from '../global/globals';
-import { Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {Globals} from '../global/globals';
+import {Observable} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
 import {FloorLayout} from '../dtos/floor-layout';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FloorLayoutService {
-  private layoutBaseUri: string = this.globals.backendUri + '/layout';
+  private readonly layoutBaseUri: string;
 
-  constructor(private httpClient: HttpClient, private globals: Globals) { }
+  constructor(private httpClient: HttpClient, private globals: Globals) {
+    this.layoutBaseUri = this.globals.backendUri + '/layout';
+  }
 
   /**
    * Loads the layout with the id from the backend
@@ -18,7 +20,7 @@ export class FloorLayoutService {
    */
 
   public getLayoutWithId(id: number): Observable<FloorLayout> {
-    console.log("Get layout with id " + id);
+    console.log('Get layout with id ' + id);
     return this.httpClient.get<FloorLayout>(this.layoutBaseUri + '/' + id);
   }
 
@@ -35,7 +37,7 @@ export class FloorLayoutService {
    * Updates an existing layout
    * @param layout to be updated
    */
-  public updateLayout (layout: FloorLayout): Observable<FloorLayout> {
+  public updateLayout(layout: FloorLayout): Observable<FloorLayout> {
     console.log('FloorLayoutService: Updating layout.');
     return this.httpClient.patch<FloorLayout>(this.layoutBaseUri, layout);
   }
