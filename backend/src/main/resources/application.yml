@@ -6,7 +6,7 @@ logging:
 
 spring:
   datasource:
-    url: ${JDBC_URL}
+    url: ${POSTGRES_URL}
     driver-class-name: org.postgresql.Driver
     username: ${POSTGRES_USER}                                    #
     password: ${POSTGRES_PASSWORD}
@@ -43,7 +43,7 @@ security:
       - /swagger-ui.html
   jwt:
     # Use http://www.allkeysgenerator.com/ to generate secrets
-    secret: ?E(H+MbQeThWmZq4t7w!z%C*F-J@NcRfUjXn2r5u8x/A?D(G+KbPdSgVkYp3s6v9
+    secret: ${JWT_SECRET}
     type: JWT
     issuer: secure-backend
     audience: secure-app
