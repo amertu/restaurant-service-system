@@ -42,13 +42,16 @@ jobs:
           name: backend-jar
           path: ./artifact
 
-          
+      - name: Enable debug logging
+        run: echo "ACTIONS_STEP_DEBUG=true" >> $GITHUB_ENV
+
       - name: Dump debug info (for troubleshooting only)
         run: |
-          echo "CLIENT ID: ${{ secrets.AZURE_CLIENT_ID }}"
-          echo "TENANT ID: ${{ secrets.AZURE_TENANT_ID }}"
-          echo "SUBSCRIPTION ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          echo "CLIENT SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}"
+          echo "CLIENT ID SET: [${{ secrets.AZURE_CLIENT_ID != '' }}]"
+          echo "TENANT ID SET: [${{ secrets.AZURE_TENANT_ID != '' }}]"
+          echo "SUBSCRIPTION ID SET: [${{ secrets.AZURE_SUBSCRIPTION_ID != '' }}]"
+          echo "CLIENT SECRET SET: [${{ secrets.AZURE_CLIENT_SECRET != '' }}]"
+
 
       - name: Azure Login
         uses: azure/login@v2
