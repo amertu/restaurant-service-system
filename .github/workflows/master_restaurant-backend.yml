@@ -61,4 +61,4 @@ jobs:
         with:
           app-name: 'restaurant-backend'
           slot-name: 'Production'
-          package: ./artifact/*.jar
+          package: '*.jar'
