@@ -2,17 +2,14 @@ name: Build and deploy backend only
 
 on:
   push:
-    paths:
-      - 'backend/**'
-  workflow_dispatch:
-
-permissions:
-  id-token: write
-  contents: read
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     defaults:
       run:
         working-directory: backend
@@ -38,6 +35,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact
