@@ -1,12 +1,12 @@
 logging:
-  file.name: ./log/backend.log
+  file.name: /var/log/production.log
   level:
-    org.springframework.web: DEBUG
-    root: INFO
+    org.springframework.web: ERROR
+    root: WARN
 
 spring:
   datasource:
-    url: ${POSTGRES_URL}
+    url: ${JDBC_URL}
     driver-class-name: org.postgresql.Driver
     username: ${POSTGRES_USER}                                    #
     password: ${POSTGRES_PASSWORD}
@@ -49,3 +49,10 @@ security:
     audience: secure-app
     # 12 hours in milliseconds
     expiration-time: 43200000
+
+# Disable Spring DevTools in production
+devtools:
+  restart:
+    enabled: false
+  livereload:
+    enabled: false

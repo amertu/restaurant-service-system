@@ -4,9 +4,10 @@ services:
     build:
       context: ./frontend
     container_name: frontend_restaurant
-    env_file: .env
     depends_on:
       - backend
+    ports:
+      - "4200:${CLIENT_PORT}"
     networks:
       - spring_network
 
@@ -14,9 +15,15 @@ services:
     build:
       context: ./backend
     container_name: backend_restaurant
-    env_file: .env
     environment:
-      - SPRING_PROFILES_ACTIVE=generateData
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JDBC_URL: ${JDBC_URL}
+      JWT_SECRET: ${JWT_SECRET}
+    volumes:
+      - logs:/var/log/backend
+    ports:
+      - "8080:${SERVER_PORT}"
     depends_on:
       - postgres
     networks:
@@ -25,14 +32,15 @@ services:
   postgres:
       image: postgres:15.2
       container_name: postgres-restaurant
-      env_file: .env
       environment:
         POSTGRES_DB: ${POSTGRES_DB}
         POSTGRES_USER: ${POSTGRES_USER}
         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         JDBC_URL: ${JDBC_URL}
       volumes:
-        - pgdata:/var/lib/postgresql/data
+        - postgres_data:/var/lib/postgresql/data
+      ports:
+        - "${POSTGRES_PORT}:${POSTGRES_PORT}"
       networks:
         - spring_network
       healthcheck:
@@ -43,7 +51,8 @@ services:
         timeout: 10s
 
 volumes:
-  pgdata:  # Ensures PostgreSQL data persists even if the container restarts
+  postgres_data: {}
+  logs: {}
 
 networks:
   spring_network:

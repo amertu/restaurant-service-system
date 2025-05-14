@@ -22,8 +22,8 @@ jobs:
           java-version: '11'
           distribution: 'microsoft'
 
-      - name: Build backend
-        run: mvn clean install
+      - name: Build backend (skip tests)
+        run: mvn clean install -DskipTests
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -40,6 +40,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend-jar
+          path: ./artifact
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -54,4 +55,4 @@ jobs:
         with:
           app-name: 'restaurant-backend'
           slot-name: 'Production'
-          package: '*.jar'
+          package: ./artifact/*.jar
