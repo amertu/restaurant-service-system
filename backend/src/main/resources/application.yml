@@ -26,6 +26,13 @@ spring:
           lob:
             non_contextual_creation: true
 
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  profiles:
+    active: generateData
+
 security:
   auth:
     header: Authorization
@@ -50,7 +57,8 @@ security:
     # 12 hours in milliseconds
     expiration-time: 43200000
 
-# Disable Spring DevTools in production
+
+
 devtools:
   restart:
     enabled: false

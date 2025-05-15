@@ -20,12 +20,14 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       JDBC_URL: ${JDBC_URL}
       JWT_SECRET: ${JWT_SECRET}
+      SPRING_PROFILES_ACTIVE: generateData
     volumes:
       - logs:/var/log/backend
     ports:
       - "8080:${SERVER_PORT}"
     depends_on:
       - postgres
+      - flyway
     networks:
       - spring_network
 
@@ -49,6 +51,21 @@ services:
         retries: 3
         start_period: 5s
         timeout: 10s
+
+flyway:
+  image: flyway/flyway
+  container_name: flyway_migration
+  environment:
+    FLYWAY_URL: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    FLYWAY_USER: ${POSTGRES_USER}
+    FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+  volumes:
+    - ./db/migrations:/flyway/sql
+  depends_on:
+    - postgres
+  networks:
+    - spring_network
+  command: ["migrate"]
 
 volumes:
   postgres_data: {}
