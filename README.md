@@ -19,29 +19,71 @@ This project implements a real-time reservation system with automated invoicing,
 - **Automated Invoicing**: Automatically generates invoices based on completed reservations, reducing manual effort.
 - **Workflow Automation**: Streamlines business processes to minimize human intervention and increase reliability.
 - **Front-End and Back-End Integration**: Ensures a smooth and responsive user experience through tight coupling of the client and server layers.
-  
+
 ## Architecture
-```markdown
-                                      +----------------+
-                                      |  Client Layer  |
-                                      +-------+--------+
-                                              |
-                                      +-------v--------+
-                                      |  API Gateway   |
-                                      +-------+--------+
-                                              |
-                     +------------------------v---------------------------+
-                     | Services (Reservation, Invoicing, User Management) |
-                     +------------------------+---------------------------+
-                                              |
-                           +------------------v-------------------+
-                           | Shared Persistence Layer (Repository)|
-                           +-----------------+--------------------+
-                                              |
-                            +-----------------v--------------------+
-                            |  Single Shared Database (One Schema) |
-                            +--------------------------------------+                                                     
-```
+<table> <tr> <td style="vertical-align:top; padding-right:30px;"> <pre> 🎯 Application Architecture (Runtime) 
+────────────────────────────────────────
+[👩‍💻 Developer]
+       │
+       ▼
+[📁 GitHub Repo]
+       |
+       ▼
+[👩‍💻 Client Layer]
+  ├─ Angular Frontend
+  └─ Bootstrap UI
+       │
+       ▼
+[🚪 API Gateway]
+       │
+       ▼
+[🛠️ Services Layer]   now        next
+  ├─ Reservation      ────────────────>
+  ├─ Invoicing
+  └─ User Management
+       │
+       ▼
+[📚 Shared Persistence Layer]
+       │
+       ▼
+[🗄️ PostgreSQL DB]] 
+</pre>
+</td> <td style="vertical-align:top;"> <pre> 🚀 Development & Deployment Pipeline
+────────────────────────────────────────
+[👩‍💻 Developer]
+    │
+    ▼
+[📁 GitHub Repo]
+(frontend + backend + infra + migrations)
+    │
+    ▼  (Push / PR triggers)
+[⚙️ GitHub Actions CI/CD]
+    ├─ Build frontend assets
+    ├─ Build backend app
+    ├─ Run tests
+    ├─ Build Docker images
+    └─ Push images → [🗄️ Azure Container Registry]
+                   │
+                   ▼
+          +------------------------+
+          |     Deployment         |
+          +------------------------+
+          |                        |
+          ▼                        ▼
+[🌐 Azure Static Web Apps]   [🖥️ Azure App Service]
+(frontend files)             (backend container)
+                             │
+                             ▼
+                     [🔐 Config: Env Vars]
+                             │
+                             ▼
+                    [🗄️ Azure PostgreSQL DB]
+                    (Managed, secure connection)
+                             │
+                             ▼
+                     [🗄️ Azure Blob Storage]
+</pre>
+</td> </tr> </table>
 
 ## Business Impact
 - **30% Reduction in Order Processing Time**: Optimized workflows led to faster operations and more efficient resource utilization.
