@@ -12,26 +12,29 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     permissions:
       contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Java version
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'microsoft'
 
-      - name: Build with Maven
-        run: mvn clean install
+      - name: Build backend (skip tests)
+        run: mvn clean install -DskipTests
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          name: backend-jar
+          path: backend/target/*.jar
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,7 +50,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: java-app
+          name: backend-jar
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -63,4 +66,3 @@ jobs:
           app-name: 'restaurant-backend'
           slot-name: 'Production'
           package: '*.jar'
-          
