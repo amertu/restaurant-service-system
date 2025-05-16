@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: '18.20.8'
 
       - name: Install dependencies
         run: |
@@ -33,12 +33,12 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          npm run build
+          npm run build --if-present
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_TOKEN }}
-          action: upload
-          app_location: frontend
-          output_location: dist
+          action: "upload"
+          app_location: "/frontend"
+          output_location: "dist/frontend"
