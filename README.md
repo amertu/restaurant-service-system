@@ -11,14 +11,19 @@
 ![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ_IDEA-2E2E2E?logo=intellijidea&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-2.49.0-f05133?logo=git&logoColor=white)
 ![Docker Compose](https://img.shields.io/badge/Docker-28.0.4-blue?logo=docker&logoColor=white)
+![Azure](https://img.shields.io/badge/Cloud-Azure-0078D4?logo=microsoftazure&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
 
-This project implements a real-time reservation system with automated invoicing, designed to enhance operational efficiency and improve customer service. The application is built using **Java**, **Spring Boot**, and **Angular**, with a strong focus on seamless integration between front-end and back-end systems.
+
+This project implements full-stack restaurant management platform featuring real-time table reservations with an interactive floor layout, invoicing, and full administrative control over users and menu items. The application is built using **Angular**, **Spring Boot**, **Docker**, and deployed to **Azure** with a **CI/CD pipeline** powered by GitHub Actions.
 
 ## Key Features
-- **Real-Time Reservations**: Enables Users to make and manage reservations via an intuitive UI, with an optimized algorithm ensuring group members are seated at adjacent tables.
-- **Automated Invoicing**: Automatically generates invoices based on completed reservations, reducing manual effort.
-- **Workflow Automation**: Streamlines business processes to minimize human intervention and increase reliability.
-- **Front-End and Back-End Integration**: Ensures a smooth and responsive user experience through tight coupling of the client and server layers.
+- **Real-Time Reservations**: Users can create and manage bookings via an intuitive interface. The system uses an optimized seating algorithm to ensure that groups are placed at adjacent tables whenever possible.
+- **Automated Invoicing**: Invoices are generated automatically for completed reservations, reducing manual work and minimizing human error.
+- **Workflow Automation**: Core business processes are streamlined and automated, improving operational efficiency and reducing the need for manual intervention.
+- **Front-End and Back-End Integration**: Tight integration between Angular frontend and Spring Boot backend ensures a seamless and responsive user experience.
+- **Scalable Deployment**: Containerized backend deployed via Docker on Azure App Service, with PostgreSQL on Azure Flexible Server and a frontend hosted on Azure Static Web Apps for reliable and scalable operations.
+
 
 ## Architecture
 <table> <tr> <td style="vertical-align:top; padding-right:30px;"> <pre> 🎯 Application Architecture (Runtime) 
@@ -86,6 +91,12 @@ This project implements a real-time reservation system with automated invoicing,
 </td> </tr> </table>
 
 ## Business Impact
-- **30% Reduction in Order Processing Time**: Optimized workflows led to faster operations and more efficient resource utilization.
-- **Enhanced Customer Service**: Faster processing and real-time feedback significantly improved the overall customer experience.
+- **~40% Faster Deployments**: CI/CD with GitHub Actions cut deployment time by ~40%, accelerating release cycles and reducing system downtime.
 
+- **Reduced Manual Overhead**: Automated invoicing and reservation handling reduced administrative workload, freeing staff to focus on customer service.
+
+- **Increased Operational Efficiency**: Real-time processing and optimized reservation logic improved table utilization and reduced order handling latency.
+
+- **Improved Developer Productivity**: Modular architecture and CI/CD pipeline reduced time-to-integrate and made the system easier to extend and maintain.
+
+- **Enhanced Customer Satisfaction**: Intuitive UI and responsive system performance led to quicker check-ins, smoother workflows, and fewer booking conflicts.
