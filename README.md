@@ -1,5 +1,9 @@
 # End-to-End Restaurant Service Automation
 
+[![Backend Build](https://img.shields.io/github/actions/workflow/status/amertu/restaurant-service-system/master_restaurant-backend.yml?branch=master&label=backend-build&logo=github)](https://github.com/amertu/restaurant-service-system/actions/workflows/master_restaurant-backend.yml)
+[![Frontend Build](https://img.shields.io/github/actions/workflow/status/amertu/restaurant-service-system/azure-static-web-apps-jolly-coast-0df939010.yml?branch=master&label=frontend-build&logo=github)](https://github.com/amertu/restaurant-service-system/actions/workflows/azure-static-web-apps-jolly-coast-0df939010.yml)
+
+
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.2.6-brightgreen?logo=spring&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-11-red?logo=openjdk&logoColor=white)
 ![UML](https://img.shields.io/badge/UML-FABD14?logo=uml&logoColor=white)
