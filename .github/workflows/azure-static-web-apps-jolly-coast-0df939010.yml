@@ -39,4 +39,4 @@ jobs:
           action: upload
           app_location: frontend
           api_location: ""
-          output_location: dist/frontend
+          output_location: dist/spring-frontend
