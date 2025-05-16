@@ -18,7 +18,7 @@
 This project implements full-stack restaurant management platform featuring real-time table reservations with an interactive floor layout, invoicing, and full administrative control over users and menu items. The application is built using **Angular**, **Spring Boot**, **Docker**, and deployed to **Azure** with a **CI/CD pipeline** powered by GitHub Actions.
 
 ## Key Features
-- **Real-Time Reservations**: Users can create and manage bookings via an intuitive interface. The system uses an optimized seating algorithm to ensure that groups are placed at adjacent tables whenever possible.
+- **Real-Time Reservations**: Users can create and manage bookings powered via a layout editor. The system uses an optimized seating algorithm to ensure that groups are placed at adjacent tables whenever possible.
 - **Automated Invoicing**: Invoices are generated automatically for completed reservations, reducing manual work and minimizing human error.
 - **Workflow Automation**: Core business processes are streamlined and automated, improving operational efficiency and reducing the need for manual intervention.
 - **Front-End and Back-End Integration**: Tight integration between Angular frontend and Spring Boot backend ensures a seamless and responsive user experience.
@@ -43,8 +43,10 @@ This project implements full-stack restaurant management platform featuring real
        │
        ▼
 [🛠️ Services Layer]   now        next
-  ├─ Reservation      ────────────────>
+  ├─ Reservation     ──────────────────>
+  ├─ Layout Management 
   ├─ Invoicing
+  ├─ Menu Management
   └─ User Management
        │
        ▼
