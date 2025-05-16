@@ -48,7 +48,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend-jar
-          path: .
+          path: target/*.jar
 
       - name: Login to Azure
         uses: azure/login@v2
