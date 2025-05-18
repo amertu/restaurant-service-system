@@ -1,5 +1,7 @@
 package com.spring.restaurant.backend.entity;
 
+import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -16,7 +18,8 @@ public class Bill {
     private Long invoiceId;
 
     @Lob
-    @Column(name = "pdf", nullable = false)
+    @Type(type = "org.hibernate.type.BinaryType")
+    @Column(name = "pdf", nullable = false, columnDefinition = "bytea")
     private byte[] pdf;
 
     @Column

@@ -1,24 +1,31 @@
-$active-focused: 87%;
-$active-unfocused: 54%;
-$inactive: 38%;
+$active-focused: 0.87;
+$active-unfocused: 0.54;
+$inactive: 0.38;
 
 .card-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 table {
+  width: 100%;
   text-align: center;
+  border-collapse: collapse;
 }
 
 button {
   opacity: $active-unfocused;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
 
   &.inactive {
     opacity: $inactive;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 
-  &:hover {
+  &:hover:not(.inactive) {
     opacity: $active-focused;
     transform: scale(1.35);
   }

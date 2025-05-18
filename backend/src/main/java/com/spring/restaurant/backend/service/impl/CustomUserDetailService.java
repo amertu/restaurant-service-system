@@ -188,4 +188,10 @@ public class CustomUserDetailService implements UserService {
         }
         else throw new NotFoundException(String.format("Could not find user with id %s", id));
     }
+
+    @Override
+    public void deleteAllUsers() {
+        LOGGER.debug("Delete all users");
+        userRepository.deleteAll();
+    }
 }

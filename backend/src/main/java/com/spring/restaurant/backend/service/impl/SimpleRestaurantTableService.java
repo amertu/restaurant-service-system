@@ -116,22 +116,22 @@ public class SimpleRestaurantTableService implements RestaurantTableService {
     }
 
     private List<RestaurantTable> getFreeTables(Long idOfReservationToIgnore, LocalDateTime startDateTime, LocalDateTime endDateTime){
-        List<Reservation> reservations = reservationService.findByStartAndEndDateTime(startDateTime, endDateTime);
+        List<Reservation> conflictReservations = reservationService.findByStartAndEndDateTime(startDateTime, endDateTime);
         Set<Long> tableNumbersOfReservedTables = new HashSet<Long>();
 
 
-        for(Reservation r: reservations){
+        for(Reservation conflictReservation: conflictReservations){
 
-            if( null != idOfReservationToIgnore && Objects.equals(r.getId(), idOfReservationToIgnore)){
+            if( null != idOfReservationToIgnore && Objects.equals(conflictReservation.getId(), idOfReservationToIgnore)){
                 continue;
             }
 
-            for(RestaurantTable table: r.getRestaurantTables()){
+            for(RestaurantTable table: conflictReservation.getRestaurantTables()){
                 tableNumbersOfReservedTables.add(table.getTableNum());
             }
         }
 
-        return restaurantTableRepository.findActiveTablesNotIn(new ArrayList<Long>(tableNumbersOfReservedTables));
+        return restaurantTableRepository.findAvailableTables(new ArrayList<Long>(tableNumbersOfReservedTables));
 
     }
 

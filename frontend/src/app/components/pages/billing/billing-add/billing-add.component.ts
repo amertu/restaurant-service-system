@@ -3,18 +3,21 @@ import {AlertService} from '../../../../services/alert.service';
 import {Dish} from '../../../../dtos/dish';
 import {BillService} from '../../../../services/bill.service';
 import {DishService} from '../../../../services/dish.service';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { Reservation } from 'src/app/dtos/reservation';
-import {DatePipe, formatDate} from '@angular/common';
-import { Bill } from 'src/app/dtos/bill';
-import { TimeUtilsService } from 'src/app/services/time-utils.service';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {Reservation} from 'src/app/dtos/reservation';
+import {DatePipe, formatDate, NgForOf, NgIf} from '@angular/common';
+import {Bill} from 'src/app/dtos/bill';
+import {TimeUtilsService} from 'src/app/services/time-utils.service';
+import {finalize, take} from 'rxjs';
 
 @Component({
   selector: 'app-billing-add',
   templateUrl: './billing-add.component.html',
   standalone: true,
   imports: [
-    DatePipe
+    DatePipe,
+    NgIf,
+    NgForOf
   ],
   styleUrls: ['./billing-add.component.scss']
 })
@@ -40,7 +43,7 @@ export class BillingAddComponent implements OnInit {
 
     if (this.reservation) {
       const tableNumbers: string[] = [];
-      for ( const table of this.reservation.restaurantTables ) {
+      for (const table of this.reservation.restaurantTables) {
         tableNumbers.push(table.tableNum.toString());
       }
       this.reservedTablesAsString = tableNumbers.join(', ');
@@ -50,19 +53,24 @@ export class BillingAddComponent implements OnInit {
   /**
    * Load available dishes
    */
-  public loadAllDishes() {
-    console.log('loadAllDishes()');
-    this.dishService.getAllDishes().subscribe(
-      (dishes: Dish[]) => {
+  public loadAllDishes(): void {
+    console.log('Loading all dishes...');
+
+    this.dishService.getAllDishes().pipe(
+      take(1),
+      finalize(() => {
+        console.log('Finished attempting to load dishes.');
+      })
+    ).subscribe({
+      next: (dishes: Dish[]) => {
         this.dishes = dishes;
-        this.selectedNumber.length = dishes.length;
-        this.selectedNumber.fill(0);
+        this.selectedNumber = new Array(dishes.length).fill(0);
       },
-      error => {
-        console.log('Failed to load dishes.');
-        this.alertService.error(error);
+      error: (err) => {
+        console.error('Failed to load dishes:', err);
+        this.alertService.error('Unable to load dishes. Please try again later.');
       }
-    );
+    });
   }
 
   /**
@@ -109,26 +117,27 @@ export class BillingAddComponent implements OnInit {
    * @param invoiceId of the bought dishes
    */
   buyDishes(invoiceId: String) {
-    const bill: Bill = new Bill ( undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, null);
+    const bill: Bill = new Bill(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, null);
     bill.invoiceId = Number(invoiceId);
     bill.dishes = this.selectedDishesObjects;
 
-    if(this.reservation) {
-      bill.reservationStartedAt = formatDate(Date.parse(this.reservation.startDateTime), 'medium', 'en-US', '+0200'  );
+    if (this.reservation) {
+      bill.reservationStartedAt = formatDate(Date.parse(this.reservation.startDateTime), 'medium', 'en-US', '+0200');
       bill.servedTables = this.reservedTablesAsString;
     }
 
-    this.billService.buyDishes(bill).subscribe(res => {
+    this.billService.buyDishes(bill).subscribe({
+      next: () => {
         this.errorMessage = 'Checkout completed successfully';
         this.errorSuccessful = true;
         this.selectedDishesObjects = [];
         this.loadAllDishes();
         this.activeModal.close();
       },
-      error1 => {
-        this.defaultServiceErrorHandling(error1);
+      error: err => {
+        this.defaultServiceErrorHandling(err);
       }
-    );
+    });
   }
 
   /**

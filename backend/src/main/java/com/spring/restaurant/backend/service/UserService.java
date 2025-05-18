@@ -100,4 +100,11 @@ public interface UserService extends UserDetailsService {
      */
     ApplicationUser findApplicationUserById(Long id);
 
+
+    /**
+     * Delete all users
+     *
+     */
+    void deleteAllUsers();
+
 }

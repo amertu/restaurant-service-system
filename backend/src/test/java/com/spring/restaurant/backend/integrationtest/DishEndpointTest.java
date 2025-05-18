@@ -53,10 +53,7 @@ public class DishEndpointTest implements TestData {
     @Autowired
     private SecurityProperties securityProperties;
 
-    private Dish dish = Dish.DishBuilder.aDish()
-        .withName(TEST_DISH_NAME)
-        .withPrice(TEST_DISH_PRICE)
-        .build();
+    private Dish dish;
 
     @BeforeEach
     public void beforeEach() {

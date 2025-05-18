@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {AlertService} from '../../../services/alert.service';
 import {DishService} from '../../../services/dish.service';
 import {Dish} from '../../../dtos/dish';
@@ -24,7 +24,8 @@ export class DishComponent implements OnInit {
   dishes: Dish[];
   selectedDish: Dish;
 
-  constructor(private dishService: DishService, private alertService: AlertService) { }
+  constructor(private dishService: DishService, private alertService: AlertService) {
+  }
 
   ngOnInit(): void {
     this.loadAllDishes();
@@ -32,15 +33,15 @@ export class DishComponent implements OnInit {
 
   public loadAllDishes() {
     console.log('loadAllDishes()');
-    this.dishService.getAllDishes().subscribe(
-      (dishes: Dish[]) => {
+    this.dishService.getAllDishes().subscribe({
+      next: (dishes: Dish[]) => {
         this.dishes = dishes;
       },
-      error => {
+      error: error => {
         console.log('Failed to load dishes.');
         this.alertService.error(error);
       }
-    );
+    });
   }
 
   formatPrice(price: number) {

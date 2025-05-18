@@ -88,7 +88,7 @@ public class RestaurantTableEndpoint {
     @PatchMapping
     @ApiOperation(value = "update a tables active status", authorizations = {@Authorization(value = "apiKey")})//TODO: change value maybe?
     public RestaurantTableDto setActive(@Valid @RequestBody RestaurantTableStatusDto partialUpdate) {
-        LOGGER.info("PATCH " + PATH + "message body: " + partialUpdate);
+        LOGGER.info("PATCH " + PATH + "message body: {}", partialUpdate);
         return restaurantTableMapper.restaurantTableEntityToDto(
             restaurantTableService.setActive(restaurantTableMapper.singleFieldRestaurantTableDtoToEntity(partialUpdate)));
     }
@@ -97,7 +97,7 @@ public class RestaurantTableEndpoint {
     @PatchMapping(value="/coordinates")
     @ApiOperation(value = "update a tables coordinates", authorizations = {@Authorization(value = "apiKey")})
     public RestaurantTableDto setCoordinates(@Valid @RequestBody RestaurantTableCoordinatesDto partialUpdate) {
-        LOGGER.info("PATCH " + PATH + "/coordinates message body: " + partialUpdate);
+        LOGGER.info("PATCH " + PATH + "/coordinates message body: {}", partialUpdate);
         return restaurantTableMapper.restaurantTableEntityToDto(
             restaurantTableService.setCoordinates(restaurantTableMapper.restaurantTableCoordinatesDtoToEntity(partialUpdate)));
     }
@@ -109,17 +109,17 @@ public class RestaurantTableEndpoint {
     )
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "Find tables for number of guests as a suggestion for where to place the guests..", authorizations = {@Authorization(value = "apiKey")})
-    public List<RestaurantTableDto> findTableSuggestion(@RequestParam(value = "numberOfGuests") Integer numberOfGuests, @RequestParam(value="idOfReservationToIgnore") Long idOfReservationToIgnore, @RequestParam(value="startDateTime")  String startDateTime, @RequestParam(value="endDateTime")  String endDateTime){
+    public List<RestaurantTableDto> findTableSuggestion(@RequestParam(value = "numberOfGuests") Integer numberOfGuests, @RequestParam(value="idOfReservationToIgnore", required = false) Long idOfReservationToIgnore, @RequestParam(value="startDateTime")  String startDateTime, @RequestParam(value="endDateTime")  String endDateTime){
 
         LOGGER.info("GET "+ PATH + "/");
         LOGGER.info("findTableSuggestion(.)");
-        LOGGER.info("idOfReservationToIgnore" + idOfReservationToIgnore);
-        LOGGER.info("numberOfGuests: " + numberOfGuests);
-        LOGGER.info("startDateTime: " + startDateTime);
-        LOGGER.info("endDateTime: " + endDateTime);
+        LOGGER.info("idOfReservationToIgnore{}", idOfReservationToIgnore);
+        LOGGER.info("numberOfGuests: {}", numberOfGuests);
+        LOGGER.info("startDateTime: {}", startDateTime);
+        LOGGER.info("endDateTime: {}", endDateTime);
 
-        LocalDateTime start = null;
-        LocalDateTime end = null;
+        LocalDateTime start;
+        LocalDateTime end;
 
         try{
             start = LocalDateTime.parse(startDateTime, DateTimeFormatter.ISO_DATE_TIME);

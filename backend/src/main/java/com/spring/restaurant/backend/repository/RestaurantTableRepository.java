@@ -31,4 +31,18 @@ public interface RestaurantTableRepository extends JpaRepository<RestaurantTable
 
     @Query(value= "SELECT COUNT(*) FROM RESTAURANT_TABLE t WHERE t.table_num = :table_num", nativeQuery = true)
     Long findNumberOfTablesWithTableNum(@Param("table_num") Long tableNum);
+
+    @Query(value = """
+        SELECT * FROM RESTAURANT_TABLE
+        WHERE active = TRUE
+        """, nativeQuery = true)
+    List<RestaurantTable> findAllActiveTables();
+
+    default List<RestaurantTable> findAvailableTables(List<Long> tableNumbersOfReservedTables) {
+        if (tableNumbersOfReservedTables == null || tableNumbersOfReservedTables.isEmpty()) {
+            return findAllActiveTables();
+        } else {
+            return findActiveTablesNotIn(tableNumbersOfReservedTables);
+        }
+    }
 }

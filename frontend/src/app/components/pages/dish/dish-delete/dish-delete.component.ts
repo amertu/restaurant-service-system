@@ -12,19 +12,20 @@ import {AlertService} from '../../../../services/alert.service';
 export class DishDeleteComponent implements OnInit {
   @Input() dish: Dish;
 
-  constructor(public dishService: DishService, public alertService: AlertService) { }
+  constructor(public dishService: DishService, public alertService: AlertService) {
+  }
 
   ngOnInit() {
   }
 
-  public deleteDish(dish: Dish) {
-    this.dishService.deleteDish(dish.id).subscribe(
-      () => {
+  public deleteDish(dish: Dish): void {
+    this.dishService.deleteDish(dish.id).subscribe({
+      next: () => {
         window.location.reload();
       },
-      error => {
-        this.alertService.error(error);
+      error: (err) => {
+        this.alertService.error(err);
       }
-    );
+    });
   }
 }

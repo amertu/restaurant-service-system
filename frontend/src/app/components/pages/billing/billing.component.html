@@ -23,12 +23,12 @@
         </thead>
         <tbody>
         <tr *ngFor="let bill of bills">
-          <td >{{bill.invoiceId}}</td>
-          <td >{{bill.paidAt | date:'MMM d, y, h:mm'}}</td>
-          <td >{{bill.servedTables}}</td>
-          <td >{{formatPrice(bill.totalCost)}}</td>
-          <td >
-            <button class="btn fas fa-file-invoice" (click)="getInvoicePDF(bill.invoiceId)"> </button>
+          <td>{{ bill.invoiceId }}</td>
+          <td>{{ bill.paidAt | date:'MMM d, y, h:mm' }}</td>
+          <td>{{ bill.servedTables }}</td>
+          <td>{{ formatPrice(bill.totalCost) }}</td>
+          <td>
+            <button class="btn fas fa-file-invoice" (click)="getInvoicePDF(bill.invoiceId)"></button>
           </td>
         </tr>
         </tbody>

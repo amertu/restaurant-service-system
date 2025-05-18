@@ -1,5 +1,6 @@
 package com.spring.restaurant.backend.integrationtest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.restaurant.backend.basetest.TestData;
 import com.spring.restaurant.backend.config.properties.SecurityProperties;
 import com.spring.restaurant.backend.endpoint.dto.ReservationDto;
@@ -12,7 +13,6 @@ import com.spring.restaurant.backend.entity.RestaurantTable;
 import com.spring.restaurant.backend.repository.ReservationRepository;
 import com.spring.restaurant.backend.repository.RestaurantTableRepository;
 import com.spring.restaurant.backend.security.JwtTokenizer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,10 +28,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,46 +87,24 @@ public class SimpleTableSuggestionStrategyTest implements TestData {
 
      */
 
-
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ReservationRepository reservationRepository;
+    @Autowired private RestaurantTableRepository restaurantTableRepository;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private ReservationMapper reservationMapper;
+    @Autowired private JwtTokenizer jwtTokenizer;
+    @Autowired private SecurityProperties securityProperties;
+    @Autowired private RestaurantTableMapper restaurantTableMapper;
+    private Reservation reservationTemplate;
+    private RestaurantTable tableTemplate;
     // Table numbers are given according to the following convention:
     // t_<x-coordinate><ZERO><y-Coordinate><ZERO><seatCount>
     private RestaurantTable t_10102, t_10504, t_10902, t_30908, t_50104, t_50502, t_50904;
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private RestaurantTableRepository restaurantTableRepository;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ReservationMapper reservationMapper;
-
-    @Autowired
-    private JwtTokenizer jwtTokenizer;
-
-    @Autowired
-    private SecurityProperties securityProperties;
-
-
-    private RestaurantTable tableTemplate;
-    private Set<RestaurantTable> restaurantTables;
-
-    @Autowired
-    RestaurantTableMapper restaurantTableMapper;
-
-    private Reservation reservationTemplate;
-
-    private List<RestaurantTable> allRestaurantTables;
 
 
     @BeforeEach
-    public void beforeEach() {
+    public void setup() {
         reservationRepository.deleteAll();
         restaurantTableRepository.deleteAll();
 
@@ -145,9 +125,144 @@ public class SimpleTableSuggestionStrategyTest implements TestData {
             .withTables(null)
             .build();
 
-        allRestaurantTables = generateTables();
+        generateTables();
+    }
+
+    @Test
+    public void Given2Guests_when_getSuggestion_Expect_Tables_OrderedBy_Origin_And_Size_ConsideringOnlyActiveTables_And_ExceptionWhenRunningOutOfSeats() throws Exception{
+
+        Reservation reservation = buildReservation(reservationTemplate, 2);
+
+        // First reservation
+        List<RestaurantTable> suggestedTables;
+        suggestedTables = getSuggestionForReservation(reservation);
+        assertEquals(1, suggestedTables.size());
+        assertEquals(t_10102.toString(), suggestedTables.get(0).toString());
+        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
+        performPostForValidReservationAndAssertCreated(reservation);
+
+        // Second reservation
+        suggestedTables = getSuggestionForReservation(reservation);
+        assertEquals(1, suggestedTables.size());
+        assertEquals(t_50502.toString(), suggestedTables.get(0).toString());
+        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
+        performPostForValidReservationAndAssertCreated(reservation);
+
+        // Third reservation
+        suggestedTables = getSuggestionForReservation(reservation);
+        assertEquals(1, suggestedTables.size());
+        assertEquals(t_10902.toString(), suggestedTables.get(0).toString());
+        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
+        performPostForValidReservationAndAssertCreated(reservation);
+
+        // 4th reservation
+        suggestedTables = getSuggestionForReservation(reservation);
+        assertEquals(1, suggestedTables.size());
+        assertEquals(t_50104.toString(), suggestedTables.get(0).toString());
+        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
+        performPostForValidReservationAndAssertCreated(reservation);
+
+        // 5th reservation
+        suggestedTables = getSuggestionForReservation(reservation);
+        assertEquals(1, suggestedTables.size());
+        assertEquals(t_50904.toString(), suggestedTables.get(0).toString());
+        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
+        performPostForValidReservationAndAssertCreated(reservation);
+
+        // 6th reservation
+        suggestedTables = getSuggestionForReservation(reservation);
+        assertEquals(1, suggestedTables.size());
+        assertEquals(t_30908.toString(), suggestedTables.get(0).toString());
+        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
+        performPostForValidReservationAndAssertCreated(reservation);
+
+        // 7th reservation
+        getSuggestionForReservationAndExpectException(reservation, "Not enough free seats available in the given time range");
+
+    }
+
+    @Test
+    public void GivenTenGuests_Expect_SuggestionFor_TableFor8AndFor2Guests_WhichAreNextToEachOther() throws Exception{
+        // 1. Erste Reservierung mit 10 Gästen
+        Reservation r1 = buildReservation(reservationTemplate, 10);
+        List<RestaurantTable> tablesR1 = getSuggestionForReservation(r1);
+        assertEquals(2, tablesR1.size());
+        assertEquals(t_30908.toString(), tablesR1.get(0).toString());
+        assertEquals(t_10902.toString(), tablesR1.get(1).toString());
+        r1.setRestaurantTables(new HashSet<>(tablesR1));
+        performPostForValidReservationAndAssertCreated(r1);
+
+        // 2. Zweite Reservierung mit anderen Tischen
+        Reservation r2 = buildReservation(reservationTemplate, 10);
+        List<RestaurantTable> tablesR2 = getSuggestionForReservation(r2);
+        assertEquals(3, tablesR2.size());
+        assertEquals(t_50104.toString(), tablesR2.get(0).toString());
+        assertEquals(t_50904.toString(), tablesR2.get(1).toString());
+        assertEquals(t_50502.toString(), tablesR2.get(2).toString());
+        r2.setRestaurantTables(new HashSet<>(tablesR2));
+        performPostForValidReservationAndAssertCreated(r2);
+
+        // 3. Dritte Reservierung schlägt fehl
+        Reservation r3 = buildReservation(reservationTemplate, 10);
+        getSuggestionForReservationAndExpectException(r3, "Not enough free seats available in the given time range");
+    }
+
+    @Test
+    public void GivenAMultiTableSelection_Expect_ClosestTablesAreFavouredOverSmallerOnes() throws Exception{
+        // Reserve the tables for 2 near the table for 8:
+        Reservation r1 = buildReservation(reservationTemplate, 2);
+        HashSet<RestaurantTable> reservedTables = new HashSet<RestaurantTable>();
+        reservedTables.add(t_10902);
+        reservedTables.add(t_50502);
+        r1.setRestaurantTables(reservedTables);
+        performPostForValidReservationAndAssertCreated(r1);
+
+        // Get suggestion for tables for 10 guests
+        Reservation r2 = buildReservation(reservationTemplate, 10);
+        List<RestaurantTable> tablesR2 = getSuggestionForReservation(r2);
+        assertEquals(2, tablesR2.size());
+        assertEquals(t_30908.toString(), tablesR2.get(0).toString());
+        assertEquals(t_50904.toString(), tablesR2.get(1).toString());
+        r2.setRestaurantTables(new HashSet<>(tablesR2));
+        performPostForValidReservationAndAssertCreated(r2);
+    }
 
 
+    @Test
+    public void GivenAllTablesReserved_When_UpdatingReservation_ExpectTablesOfReservationWhichIsToBeUpdated_AreIgnored() throws Exception{
+        // Reserve the tables for 2 near the table for 8:
+        Reservation r1 = buildReservation(reservationTemplate, 2);
+        HashSet<RestaurantTable> reservedTables = new HashSet<RestaurantTable>();
+        reservedTables.add(t_10902);
+        reservedTables.add(t_50502);
+        r1.setRestaurantTables(reservedTables);
+        performPostForValidReservationAndAssertCreated(r1);
+
+        // Get suggestion for tables for 10 guests
+        Reservation r2 = buildReservation(reservationTemplate, 10);
+        List<RestaurantTable> tablesR2 = getSuggestionForReservation(r2);
+        assertEquals(2, tablesR2.size());
+        assertEquals(t_30908.toString(), tablesR2.get(0).toString());
+        assertEquals(t_50904.toString(), tablesR2.get(1).toString());
+        r2.setRestaurantTables(new HashSet<>(tablesR2));
+
+        // Now, there aren't enough tables for 8 guests anymore.
+        // however, if we update the last created reservation for 10 guest,
+        // to have only have 8 guests instead of 10, this should work.
+        r2.setNumberOfGuests(8);
+        tablesR2 = getSuggestionForReservation(r2);
+        r2.setRestaurantTables(new HashSet<>(tablesR2));
+        Reservation r3 = buildReservation(reservationTemplate, 8);
+        List<RestaurantTable> tablesR3 = getSuggestionForReservation(r3);
+        assertEquals(1, tablesR3.size());
+        assertEquals(t_30908.toString(), tablesR3.get(0).toString());
+
+        // Getting suggestion for 10 people again, will return the same result for 10 people as before:
+        r2.setNumberOfGuests(10);
+        tablesR2 = getSuggestionForReservation(r2);
+        assertEquals(2, tablesR2.size());
+        assertEquals(t_30908.toString(), tablesR2.get(0).toString());
+        assertEquals(t_50904.toString(), tablesR2.get(1).toString());
     }
 
     private List<RestaurantTable> generateTables() {
@@ -186,184 +301,8 @@ public class SimpleTableSuggestionStrategyTest implements TestData {
         return restaurantTableRepository.save(table);
     }
 
-
-
-    @Test
-    public void Given2Guests_when_getSuggestion_Expect_Tables_OrderedBy_Origin_And_Size_ConsideringOnlyActiveTables_And_ExceptionWhenRunningOutOfSeats() throws Exception{
-
-        Reservation reservation = getReservationFromTemplateWithGuestCount(2);
-
-        // First reservation
-        List<RestaurantTable> suggestedTables;
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(1, suggestedTables.size());
-        assertEquals(t_10102.toString(), suggestedTables.get(0).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        performPostForValidReservationAndAssertCreated(reservation);
-
-        // Second reservation
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(1, suggestedTables.size());
-        assertEquals(t_50502.toString(), suggestedTables.get(0).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        performPostForValidReservationAndAssertCreated(reservation);
-
-        // Third reservation
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(1, suggestedTables.size());
-        assertEquals(t_10902.toString(), suggestedTables.get(0).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        performPostForValidReservationAndAssertCreated(reservation);
-
-        // 4th reservation
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(1, suggestedTables.size());
-        assertEquals(t_50104.toString(), suggestedTables.get(0).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        performPostForValidReservationAndAssertCreated(reservation);
-
-        // 5th reservation
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(1, suggestedTables.size());
-        assertEquals(t_50904.toString(), suggestedTables.get(0).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        performPostForValidReservationAndAssertCreated(reservation);
-
-        // 6th reservation
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(1, suggestedTables.size());
-        assertEquals(t_30908.toString(), suggestedTables.get(0).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        performPostForValidReservationAndAssertCreated(reservation);
-
-        // 7th reservation
-        getSuggestionForReservationAndExpectException(reservation, "Not enough free seats available in the given time range");
-
-    }
-
-    @Test
-    public void GivenTenGuests_Expect_SuggestionFor_TableFor8AndFor2Guests_WhichAreNextToEachOther() throws Exception{
-
-        Reservation reservation = getReservationFromTemplateWithGuestCount(10);
-
-        // First reservation
-        List<RestaurantTable> suggestedTables;
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(2, suggestedTables.size());
-        assertEquals(t_30908.toString(), suggestedTables.get(0).toString());
-        assertEquals(t_10902.toString(), suggestedTables.get(1).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        performPostForValidReservationAndAssertCreated(reservation);
-
-        // Second reservation
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(3, suggestedTables.size());
-        assertEquals(t_50104.toString(), suggestedTables.get(0).toString());
-        assertEquals(t_50904.toString(), suggestedTables.get(1).toString());
-        assertEquals(t_50502.toString(), suggestedTables.get(2).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        performPostForValidReservationAndAssertCreated(reservation);
-
-        // Third reservation
-        getSuggestionForReservationAndExpectException(reservation, "Not enough free seats available in the given time range");
-    }
-
-    @Test
-    public void GivenAMultiTableSelection_Expect_ClosestTablesAreFavouredOverSmallerOnes() throws Exception{
-
-        // Reserve the tables for 2 near the table for 8:
-        Reservation reservation = getReservationFromTemplateWithGuestCount(2);
-        HashSet<RestaurantTable> reservedTables = new HashSet<RestaurantTable>();
-        reservedTables.add(t_10902);
-        reservedTables.add(t_50502);
-        reservation.setRestaurantTables(reservedTables);
-        performPostForValidReservationAndAssertCreated(reservation);
-
-
-        // Get suggestion for tables for 10 guests
-        reservation = getReservationFromTemplateWithGuestCount(10);
-
-        List<RestaurantTable> suggestedTables;
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(2, suggestedTables.size());
-        assertEquals(t_30908.toString(), suggestedTables.get(0).toString());
-        assertEquals(t_50904.toString(), suggestedTables.get(1).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        performPostForValidReservationAndAssertCreated(reservation);
-
-    }
-
-
-    @Test
-    public void GivenAllTablesReserved_When_UpdatingReservation_ExpectTablesOfReservationWhichIsToBeUpdated_AreIgnored() throws Exception{
-
-        // Reserve the tables for 2 near the table for 8:
-        Reservation reservation = getReservationFromTemplateWithGuestCount(2);
-        HashSet<RestaurantTable> reservedTables = new HashSet<RestaurantTable>();
-        reservedTables.add(t_10902);
-        reservedTables.add(t_50502);
-        reservation.setRestaurantTables(reservedTables);
-        performPostForValidReservationAndAssertCreated(reservation);
-
-
-        // Get suggestion for tables for 10 guests
-        reservation = getReservationFromTemplateWithGuestCount(10);
-
-        List<RestaurantTable> suggestedTables;
-        suggestedTables = getSuggestionForReservation(reservation);
-
-        assertEquals(2, suggestedTables.size());
-        assertEquals(t_30908.toString(), suggestedTables.get(0).toString());
-        assertEquals(t_50904.toString(), suggestedTables.get(1).toString());
-
-        reservation.setRestaurantTables(new HashSet<>(suggestedTables));
-        MockHttpServletResponse response = performPostForValidReservationAndAssertCreated(reservation);
-        ReservationDto createdReservationDto = objectMapper.readValue(response.getContentAsString(),
-            ReservationDto.class);
-
-
-        // Now, there aren't enough tables for 8 guests anymore.
-        // however, if we update the last created reservation for 10 guest,
-        // to have only have 8 guests instead of 10, this should work.
-
-        createdReservationDto.setNumberOfGuests(8);
-        suggestedTables = getSuggestionForReservation(reservationMapper.reservationDtoToReservation(createdReservationDto));
-        assertEquals(1, suggestedTables.size());
-        assertEquals(t_30908.toString(), suggestedTables.get(0).toString());
-
-        // Getting suggestion for 10 people again, will return the same result for 10 people as before:
-        createdReservationDto.setNumberOfGuests(10);
-        suggestedTables = getSuggestionForReservation(reservationMapper.reservationDtoToReservation(createdReservationDto));
-
-        assertEquals(2, suggestedTables.size());
-        assertEquals(t_30908.toString(), suggestedTables.get(0).toString());
-        assertEquals(t_50904.toString(), suggestedTables.get(1).toString());
-
-    }
-
-
-
-    private List<RestaurantTable> getSuggestionForReservation(Reservation r) throws Exception{
-        MockHttpServletResponse response;
-        response = performFindTableSuggestionAndAssertOk(r.getNumberOfGuests(), r.getId(), r.getStartDateTime(), r.getEndDateTime());
+    private List<RestaurantTable> getSuggestionForReservation(Reservation reservation) throws Exception{
+        MockHttpServletResponse response = performFindTableSuggestionAndAssertOk(reservation);
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
         assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
@@ -372,42 +311,28 @@ public class SimpleTableSuggestionStrategyTest implements TestData {
         return restaurantTableMapper.restaurantTableDtoToEntity(tablesDto);
     }
 
-    private void getSuggestionForReservationAndExpectException(Reservation r, String exceptionMessage) throws Exception{
+    private void getSuggestionForReservationAndExpectException(Reservation reservation, String exceptionMessage) throws Exception{
         MockHttpServletResponse response;
-        response = performFindTableSuggestionAndAssertOk(r.getNumberOfGuests(), r.getId(), r.getStartDateTime(), r.getEndDateTime());
+        response = performFindTableSuggestionAndAssertOk(reservation);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), response.getStatus());
         assertEquals("text/plain;charset=UTF-8", response.getContentType());
         assertTrue(response.getContentAsString().contains(exceptionMessage));
     }
 
-    private MockHttpServletResponse performFindTableSuggestionAndAssertOk(Integer numberOfGuests, Long idOfReservationToIgnore, LocalDateTime start, LocalDateTime end) throws Exception{
+    private MockHttpServletResponse performFindTableSuggestionAndAssertOk(Reservation reservation) throws Exception {
 
-        start = start.truncatedTo(ChronoUnit.SECONDS);
-        end = end.truncatedTo(ChronoUnit.SECONDS);
+        String start = reservation.getStartDateTime().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_DATE_TIME);
+        String end = reservation.getEndDateTime().truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_DATE_TIME);
+        Long idOfReservationToIgnoreAsString = 999L;
+        Long numberOfGuests = Long.valueOf(reservation.getNumberOfGuests());
 
-        String startAsString, endAsString;
-        startAsString = start.format(DateTimeFormatter.ISO_DATE_TIME);
-        endAsString = end.format(DateTimeFormatter.ISO_DATE_TIME);
-        String idOfReservationToIgnoreAsString = "";
-
-        if(null != idOfReservationToIgnore){
-            idOfReservationToIgnoreAsString = "" + idOfReservationToIgnore;
-        }
-
-        MvcResult mvcResult = this.mockMvc.perform(get(TABLE_BASE_URI +"?numberOfGuests=" + numberOfGuests + "&idOfReservationToIgnore=" + idOfReservationToIgnoreAsString + "&startDateTime=" + startAsString + "&endDateTime=" + endAsString)
-            .header(securityProperties.getAuthHeader(), jwtTokenizer.getAuthToken(ADMIN_USER, ADMIN_ROLES)))
+        MvcResult mvcResult = this.mockMvc.perform(get(TABLE_BASE_URI + "?numberOfGuests=" + numberOfGuests + "&idOfReservationToIgnore=" + idOfReservationToIgnoreAsString + "&startDateTime=" + start + "&endDateTime=" + end)
+                .header(securityProperties.getAuthHeader(), jwtTokenizer.getAuthToken(ADMIN_USER, ADMIN_ROLES)))
             .andDo(print())
             .andReturn();
-        MockHttpServletResponse response =  mvcResult.getResponse();
+        MockHttpServletResponse response = mvcResult.getResponse();
         return response;
-    }
-
-    private Reservation getReservationFromTemplateWithGuestCount(int guestCount) {
-        Reservation reservation = reservationTemplate;
-        reservation.setNumberOfGuests(guestCount);
-        reservation.setGuestName("Guest with " + guestCount + " guests.");
-        return reservation;
     }
 
     private MockHttpServletResponse performPostForValidReservationAndAssertCreated(Reservation reservation) throws  Exception{
@@ -426,6 +351,17 @@ public class SimpleTableSuggestionStrategyTest implements TestData {
         assertEquals(HttpStatus.CREATED.value(), response.getStatus());
         assertEquals(MediaType.APPLICATION_JSON_VALUE, response.getContentType());
         return response;
+    }
+
+    private Reservation buildReservation(Reservation reservation, int numberOfGuests) {
+        return Reservation.ReservationBuilder.aReservation()
+            .withGuestName(reservation.getGuestName())
+            .withNumberOfGuests(numberOfGuests)
+            .withContactInformation(TEST_CONTACT_INFORMATION_FOR_VALID_RESERVATOIN)
+            .withComment(TEST_COMMENT_FOR_VALID_RESERVATION)
+            .withStartDateTime(reservation.getStartDateTime())
+            .withEndDateTime(reservation.getEndDateTime())
+            .build();
     }
 
 }

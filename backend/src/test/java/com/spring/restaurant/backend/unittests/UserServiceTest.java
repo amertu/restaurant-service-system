@@ -5,6 +5,7 @@ import com.spring.restaurant.backend.entity.ApplicationUser;
 import com.spring.restaurant.backend.exception.NotFoundException;
 import com.spring.restaurant.backend.exception.UserExistException;
 import com.spring.restaurant.backend.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +25,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Transactional
 public class UserServiceTest implements TestData {
 
-    @Autowired
-    private UserService customUserDetailService;
+    @Autowired private UserService userService;
 
+    @BeforeEach
+    public void setup() {
+        userService.deleteAllUsers();
+    }
 
     @Test
     public void whenSaveUser_withOutPassword_gives() {
 
         ApplicationUser applicationUser = ApplicationUser.ApplicationUserBuilder.aUser()
-            .withEmail(TEST_USER_EMAIL)
+            .withEmail("first@email.com")
             .withPassword("")
             .withFirstName(TEST_USER_FIRSTNAME)
             .withAdmin(TEST_USER_ADMIN)
@@ -41,7 +45,7 @@ public class UserServiceTest implements TestData {
             .withBlocked(TEST_USER_BLOCKED)
             .buildApplicationUser();
 
-        assertThrows(ValidationException.class, () -> customUserDetailService.registerNewUser(applicationUser));
+        assertThrows(ValidationException.class, () -> userService.registerNewUser(applicationUser));
     }
 
     @Test
@@ -57,13 +61,13 @@ public class UserServiceTest implements TestData {
             .withBlocked(TEST_USER_BLOCKED)
             .buildApplicationUser();
 
-        assertThrows(ValidationException.class, () -> customUserDetailService.registerNewUser(applicationUser));
+        assertThrows(ValidationException.class, () -> userService.registerNewUser(applicationUser));
     }
 
     @Test
     public void whenGetEmailByeUser_NotFound_ShouldThrowNotFoundException() throws NotFoundException, ValidationException {
         ApplicationUser applicationUser = ApplicationUser.ApplicationUserBuilder.aUser()
-            .withEmail(TEST_USER_EMAIL)
+            .withEmail("second@email.com")
             .withPassword(TEST_USER_PASSWORD)
             .withFirstName(TEST_USER_FIRSTNAME)
             .withAdmin(TEST_USER_ADMIN)
@@ -72,10 +76,10 @@ public class UserServiceTest implements TestData {
             .withBlocked(TEST_USER_BLOCKED)
             .buildApplicationUser();
 
-        customUserDetailService.registerNewUser(applicationUser);
+        userService.registerNewUser(applicationUser);
         assertAll(
-            () -> assertThrows(UserExistException.class, () -> customUserDetailService.registerNewUser(applicationUser)),
-            () -> assertThrows(NotFoundException.class, () -> customUserDetailService.findApplicationUserByEmail(TEST_USER_INVALID_EMAIL))
+            () -> assertThrows(UserExistException.class, () -> userService.registerNewUser(applicationUser)),
+            () -> assertThrows(NotFoundException.class, () -> userService.findApplicationUserByEmail(TEST_USER_INVALID_EMAIL))
         );
     }
 
@@ -85,12 +89,12 @@ public class UserServiceTest implements TestData {
             .withEmail(ADMIN_USER)
             .withPassword(TEST_USER_PASSWORD)
             .withFirstName(TEST_USER_FIRSTNAME)
-            .withAdmin(TEST_USER_ADMIN)
+            .withAdmin(true)
             .withLastName(TEST_USER_LASTNAME)
             .withSsnr(TEST_USER_SSNR)
             .buildApplicationUser();
-        customUserDetailService.registerNewUser(applicationUser);
-        assertThrows(ValidationException.class, () -> customUserDetailService.deleteAsAdminUser(ADMIN_USER,ADMIN_USER));
+        userService.registerNewUser(applicationUser);
+        assertThrows(ValidationException.class, () -> userService.deleteAsAdminUser(ADMIN_USER,ADMIN_USER));
     }
 
 }

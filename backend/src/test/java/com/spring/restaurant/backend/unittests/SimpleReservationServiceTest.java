@@ -49,7 +49,7 @@ public class SimpleReservationServiceTest {
 
 
     @BeforeEach
-    public void beforeEach() {
+    public void setup() {
         restaurantTableRepository.deleteAll();
         reservationRepository.deleteAll();
 

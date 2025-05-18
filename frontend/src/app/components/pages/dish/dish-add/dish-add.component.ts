@@ -24,6 +24,7 @@ export class DishAddComponent implements OnInit {
 
 
   ngOnInit(): void {
+    this.initDishFormGroup();
   }
 
   private initDishFormGroup() {

@@ -1,3 +1,4 @@
+/*
 package com.spring.restaurant.backend.config;
 
 import org.springframework.context.annotation.Bean;
@@ -45,3 +46,4 @@ public class SwaggerConfig {
         return new ApiKey("apiKey", "Authorization", "header");
     }
 }
+*/

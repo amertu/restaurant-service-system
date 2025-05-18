@@ -44,7 +44,7 @@ public class ReservationEndpoint {
     @ApiOperation(value = "Get list of reservations without details", authorizations = {@Authorization(value = "apiKey")})
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationDto> findAll() {
-        LOGGER.info("GET "+ BASE_URL);
+        LOGGER.info("GET {}", BASE_URL);
         return reservationMapper.reservationToReservationDto(reservationService.findAll());
     }
 
@@ -61,8 +61,8 @@ public class ReservationEndpoint {
 
         LOGGER.info("GET "+ BASE_URL);
         LOGGER.info("findByStartAndEndDateTime(.)");
-        LOGGER.info("startDateTime: " +startDateTime);
-        LOGGER.info("endDateTIme: " + endDateTime);
+        LOGGER.info("startDateTime: {}", startDateTime);
+        LOGGER.info("endDateTIme: {}", endDateTime);
 
         LocalDateTime start = null;
         LocalDateTime end = null;

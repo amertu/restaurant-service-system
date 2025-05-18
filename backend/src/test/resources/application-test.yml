@@ -2,10 +2,36 @@ logging:
   file.name: ./log/backend-test.log
   level:
     root: INFO
-
 spring:
   datasource:
-    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: ${JDBC_URL:jdbc:postgresql://localhost:5432/test_db}
+    driver-class-name: org.postgresql.Driver
+    username: ${POSTGRES_USER:demo}
+    password: ${POSTGRES_PASSWORD:demo}
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+security:
+  auth:
+    header: Authorization
+    prefix: "Bearer "
+    login-uri: /api/v1/authentication
+    white-list:
+      # Browser requests
+      - /
+      - /favicon.ico
+      - /csrf
+  jwt:
+    secret: ${JWT_SECRET}
+    type: JWT
+    issuer: secure-backend
+    audience: secure-app
+    expiration-time: 43200000

@@ -1,15 +1,15 @@
 package com.spring.restaurant.backend.service.impl;
 
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import com.spring.restaurant.backend.entity.*;
 import com.spring.restaurant.backend.repository.BillRepository;
 import com.spring.restaurant.backend.repository.PurchaseRepository;
 import com.spring.restaurant.backend.repository.UserRepository;
 import com.spring.restaurant.backend.service.BillService;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,20 +17,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.ValidationException;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 public class SimpleBillService implements BillService {
@@ -80,211 +77,221 @@ public class SimpleBillService implements BillService {
     }
 
     @Override
-    public void createPdfOfBill(List<Purchase> purchases, Long invoiceId, LocalDateTime paidAt, String reservationStartedAt, String servedTables,  ApplicationUser user) {
+    public void createPdfOfBill(List<Purchase> purchases, Long invoiceId, LocalDateTime paidAt,
+                                String reservationStartedAt, String servedTables, ApplicationUser user) {
 
-        LOGGER.info("creating invoice");
-        String pdfName = "invoice.pdf";
+        LOGGER.info("Creating invoice PDF");
+        final String pdfName = "invoice.pdf";
+        final String date = paidAt.toLocalDate().toString();
 
-        Document document = new Document();
-        String date = paidAt.toString().substring(0, 10);
-
-        try {
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdfName));
+        try (FileOutputStream fos = new FileOutputStream(pdfName)) {
+            Document document = new Document();
+            PdfWriter writer = PdfWriter.getInstance(document, fos);
             document.open();
 
-            //Fonts
+            // Fonts
             Font addressFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
             Font tableHeaderFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
             Font tableContentFont = FontFactory.getFont(FontFactory.HELVETICA, 11);
             Font taxTableContentFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
             Font footerFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
 
-            // Initialize an image and add it with para restaurant name
-            Image image = Image.getInstance("src/main/resources/image/leaf.png");
-            image.scaleAbsolute(15, 15);
-            PdfPCell logoParaTextCell = new PdfPCell();
-            logoParaTextCell.setBorder(Rectangle.NO_BORDER);
-            Paragraph p = new Paragraph();
-            p.add(new Chunk(image, 0, 0));
-            p.add(new Phrase("Spring Kitchen", FontFactory.getFont(FontFactory.COURIER, 16, BaseColor.BLACK)));
-            logoParaTextCell.addElement(p);
-
-            // Initialize a table for address, date, invoice nr., restaurant name and logo
-            PdfPTable headerTable = new PdfPTable(2);
-            headerTable.setWidthPercentage(100);
-            headerTable.setWidths(new float[]{3.3f,1});
-            headerTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-            headerTable.addCell(" ");
-            headerTable.addCell(new Phrase("Spring Kitchen GmbH", addressFont));
-            headerTable.addCell(" ");
-            headerTable.addCell(new Phrase("Frühlingsstraße 76", addressFont));
-            headerTable.addCell(" ");
-            headerTable.addCell(new Phrase("www.springkitchen.at", addressFont));
-            headerTable.addCell(" ");
-            headerTable.addCell(new Phrase("springkitchen@mail.com", addressFont));
-            headerTable.addCell(" ");
-            headerTable.addCell(new Phrase("Tel/Fax +43(0)1/1234567", addressFont));
-            headerTable.addCell(" ");
-            headerTable.addCell(new Phrase("VATIN: ATU87654321", addressFont));
-            headerTable.addCell(logoParaTextCell);
-            headerTable.addCell(new Phrase(" "));
-            headerTable.addCell(" ");
-            headerTable.addCell(new Phrase("Date: " + date, addressFont));
-            headerTable.addCell(" ");
-            if( null != reservationStartedAt) {
-                headerTable.addCell(new Phrase("Reservation started at: " + reservationStartedAt, addressFont));
-                headerTable.addCell(" ");
-            }
-            if( null != servedTables && !("".equals(servedTables))){
-                headerTable.addCell(new Phrase("Served tables: " + servedTables, addressFont));
-                headerTable.addCell(" ");
-            }
-            headerTable.addCell(new Phrase("Invoice number: " + invoiceId, addressFont));
+            // Header table
+            PdfPTable headerTable = buildHeaderTable(date, reservationStartedAt, servedTables, invoiceId, addressFont);
 
             // Main invoice table
-            // Header row of main invoice table
-            PdfPTable invoiceTable = new PdfPTable(3);
-            invoiceTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-            //invoiceTable.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
-            invoiceTable.setSpacingBefore(10f);
-            PdfPCell QTYCell = new PdfPCell();
-            QTYCell.setBorder(Rectangle.BOTTOM);
-            QTYCell.addElement(new Phrase("QTY", tableHeaderFont));
-            invoiceTable.addCell(QTYCell);
-            PdfPCell nameCell = new PdfPCell();
-            nameCell.setBorder(Rectangle.BOTTOM);
-            nameCell.addElement(new Phrase("Name", tableHeaderFont));
-            invoiceTable.addCell(nameCell);
-            PdfPCell priceCell = new PdfPCell();
-            priceCell.setBorder(Rectangle.BOTTOM);
-            priceCell.addElement(new Phrase("Price", tableHeaderFont));
-            invoiceTable.addCell(priceCell);
-
-            // Map to count QTY for each dish
-            Map<Dish, Integer> count = new HashMap<Dish, Integer>();
-            for (int i = 0; i < purchases.size(); i++) {
-                if (purchases.get(i) != null) {
-                    if (!count.containsKey(purchases.get(i).getDish())) {
-                        count.put(purchases.get(i).getDish(), 1);
-                    } else {
-                        count.put(purchases.get(i).getDish(), count.get(purchases.get(i).getDish()) + 1);
-                    }
-                }
-            }
-
-            // Content cells of main invoice table
-            double foodPrice = 0;
-            double drinkPrice = 0;
-            if (!count.isEmpty()) {
-                for (Dish d : count.keySet()) {
-                    invoiceTable.addCell(new Phrase(count.get(d).toString(), tableContentFont));
-                    invoiceTable.addCell(new Phrase(d.getName(), tableContentFont));
-                    invoiceTable.addCell(new Phrase(String.format("%.2f",d.getPrice() * count.get(d) / 100.0) + " €", tableContentFont));
-
-                    if (d.getCategory().equals(Category.FOOD)) {
-                        foodPrice += (d.getPrice() * count.get(d));
-                    } else {
-                        drinkPrice += (d.getPrice() * count.get(d));
-                    }
-
-                }
-            }
-
-            double foodPriceRounded = round(foodPrice/100, 2);
-            double drinkPriceRounded = round(drinkPrice/100, 2);
-            double total = round(foodPriceRounded + drinkPriceRounded,2);
-            invoiceTable.setSpacingAfter(13f);
+            Map<Dish, Integer> itemCounts = countPurchases(purchases);
+            PdfPTable invoiceTable = buildInvoiceTable(itemCounts, tableHeaderFont, tableContentFont);
 
             // Tax table
-            double foodTax = round(foodPriceRounded * 10 / 110,2);
-            double drinkTax = round(drinkPriceRounded * 20 / 120,2);
-            double foodNetPrice = round(foodPriceRounded - foodTax,2);
-            double drinkNetPrice = round(drinkPriceRounded - drinkTax,2);
-            PdfPTable taxTable = new PdfPTable(4);
-            taxTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-            taxTable.setWidthPercentage(52);
-            taxTable.addCell(new Phrase("VAT", taxTableContentFont));
-            taxTable.addCell(new Phrase("Net", taxTableContentFont));
-            taxTable.addCell(new Phrase("Tax", taxTableContentFont));
-            taxTable.addCell(new Phrase("Gross", taxTableContentFont));
-            taxTable.addCell(new Phrase("10.00%", taxTableContentFont));
-            taxTable.addCell(new Phrase(String.format("%.2f", foodNetPrice), taxTableContentFont));
-            taxTable.addCell(new Phrase(String.format("%.2f", foodTax), taxTableContentFont));
-            taxTable.addCell(new Phrase(String.format("%.2f", foodPriceRounded), taxTableContentFont));
-            taxTable.addCell(new Phrase("20.00%", taxTableContentFont));
-            taxTable.addCell(new Phrase(String.format("%.2f", drinkNetPrice), taxTableContentFont));
-            taxTable.addCell(new Phrase(String.format("%.2f", drinkTax), taxTableContentFont));
-            taxTable.addCell(new Phrase(String.format("%.2f", drinkPriceRounded), taxTableContentFont));
-            PdfPCell totalPriceTextCell = new PdfPCell(new Phrase("Total price: ", tableHeaderFont));
-            totalPriceTextCell.setBorder(Rectangle.TOP);
-            totalPriceTextCell.setColspan(3);
-            taxTable.addCell(totalPriceTextCell);
-            PdfPCell totalPriceCell = new PdfPCell(new Phrase(String.format("%.2f", total) + " EUR", tableHeaderFont));
-            totalPriceCell.setBorder(Rectangle.TOP);
-            totalPriceCell.setHorizontalAlignment(Element.ALIGN_MIDDLE);
-            totalPriceCell.setColspan(1);
-            taxTable.addCell(totalPriceCell);
+            PdfPTable taxTable = buildTaxTable(itemCounts, tableHeaderFont, taxTableContentFont);
+            double total = computeTotal(itemCounts);
 
-            // Draw a footer line
-            PdfContentByte canvas = writer.getDirectContent();
-            canvas.moveTo(80, document.bottom() + 10);
-            canvas.lineTo(520, document.bottom() + 10);
-            canvas.closePathStroke();
-            // Add footer content
-            Rectangle page = document.getPageSize();
-            PdfPTable footerTable = new PdfPTable(1);
-            footerTable.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
-            footerTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-            footerTable.addCell(new Phrase("Thank you for your visit!", footerFont));
-            footerTable.addCell(new Phrase("You have been served by " + user.getFirstName() + " " + user.getLastName(), footerFont));
-            footerTable.setTotalWidth(page.getWidth() - document.leftMargin() - document.rightMargin());
-            footerTable.writeSelectedRows(0, -1, 40 , document.bottomMargin() +5, writer.getDirectContent());
+            // Footer
+            drawFooter(document, writer, footerFont, user);
 
-
-            Paragraph space = new Paragraph("\n" + "\n");
+            // Final layout
+            Paragraph space = new Paragraph("\n\n");
             document.add(headerTable);
-            document.add(space);
             document.add(space);
             document.add(invoiceTable);
             document.add(space);
             document.add(taxTable);
             document.close();
+
             saveBill(pdfName, invoiceId, paidAt, total, reservationStartedAt, servedTables);
 
         } catch (IOException | DocumentException e) {
-            LOGGER.error("Error creating invoice PDF: {}", e.getMessage());
+            LOGGER.error("Error creating invoice PDF: {}", e.getMessage(), e);
         }
     }
 
-    private double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
+    private PdfPTable buildHeaderTable(String date, String reservationStartedAt, String servedTables,
+                                       Long invoiceId, Font addressFont) throws IOException, DocumentException {
+        Image logo = Image.getInstance("src/main/resources/image/leaf.png");
+        logo.scaleAbsolute(15, 15);
+        Paragraph logoParagraph = new Paragraph();
+        logoParagraph.add(new Chunk(logo, 0, 0));
+        logoParagraph.add(new Phrase("Spring Kitchen", FontFactory.getFont(FontFactory.COURIER, 16)));
 
-        BigDecimal bd = new BigDecimal(Double.toString(value));
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
-        return bd.doubleValue();
+        PdfPCell logoCell = new PdfPCell();
+        logoCell.setBorder(Rectangle.NO_BORDER);
+        logoCell.addElement(logoParagraph);
+
+        PdfPTable table = new PdfPTable(2);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{3.3f, 1});
+        table.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        String[] lines = new String[]{
+            "Spring Kitchen GmbH", "Frühlingsstraße 76", "www.springkitchen.at",
+            "springkitchen@mail.com", "Tel/Fax +43(0)1/1234567", "VATIN: ATU87654321",
+            "Date: " + date,
+            reservationStartedAt != null ? "Reservation started at: " + reservationStartedAt : null,
+            servedTables != null && !servedTables.isBlank() ? "Served tables: " + servedTables : null,
+            "Invoice number: " + invoiceId
+        };
+
+        for (String line : lines) {
+            if (line != null) {
+                table.addCell(" ");
+                table.addCell(new Phrase(line, addressFont));
+            }
+        }
+
+        table.addCell(logoCell);
+        table.addCell(" ");
+        return table;
     }
+
+    private Map<Dish, Integer> countPurchases(List<Purchase> purchases) {
+        Map<Dish, Integer> count = new HashMap<>();
+        for (Purchase p : purchases) {
+            if (p != null && p.getDish() != null) {
+                count.merge(p.getDish(), 1, Integer::sum);
+            }
+        }
+        return count;
+    }
+
+    private PdfPTable buildInvoiceTable(Map<Dish, Integer> count, Font headerFont, Font contentFont) {
+        PdfPTable table = new PdfPTable(3);
+        table.setSpacingBefore(10f);
+        table.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        Stream.of("QTY", "Name", "Price").forEach(header -> {
+            PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
+            cell.setBorder(Rectangle.BOTTOM);
+            table.addCell(cell);
+        });
+
+        count.forEach((dish, qty) -> {
+            table.addCell(new Phrase(String.valueOf(qty), contentFont));
+            table.addCell(new Phrase(dish.getName(), contentFont));
+            double price = (dish.getPrice() * qty) / 100.0;
+            table.addCell(new Phrase(String.format("%.2f €", price), contentFont));
+        });
+
+        table.setSpacingAfter(13f);
+        return table;
+    }
+
+    private PdfPTable buildTaxTable(Map<Dish, Integer> count, Font headerFont, Font contentFont) {
+        double foodPrice = 0, drinkPrice = 0;
+        for (Map.Entry<Dish, Integer> entry : count.entrySet()) {
+            double price = entry.getKey().getPrice() * entry.getValue();
+            if (entry.getKey().getCategory() == Category.FOOD) foodPrice += price;
+            else drinkPrice += price;
+        }
+
+        double foodGross = round(foodPrice / 100, 2);
+        double drinkGross = round(drinkPrice / 100, 2);
+        double foodTax = round(foodGross * 10 / 110, 2);
+        double drinkTax = round(drinkGross * 20 / 120, 2);
+        double foodNet = round(foodGross - foodTax, 2);
+        double drinkNet = round(drinkGross - drinkTax, 2);
+
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(52);
+        table.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+
+        Stream.of("VAT", "Net", "Tax", "Gross").forEach(label ->
+            table.addCell(new Phrase(label, contentFont)));
+
+        table.addCell(new Phrase("10.00%", contentFont));
+        table.addCell(new Phrase(String.format("%.2f", foodNet), contentFont));
+        table.addCell(new Phrase(String.format("%.2f", foodTax), contentFont));
+        table.addCell(new Phrase(String.format("%.2f", foodGross), contentFont));
+
+        table.addCell(new Phrase("20.00%", contentFont));
+        table.addCell(new Phrase(String.format("%.2f", drinkNet), contentFont));
+        table.addCell(new Phrase(String.format("%.2f", drinkTax), contentFont));
+        table.addCell(new Phrase(String.format("%.2f", drinkGross), contentFont));
+
+        PdfPCell totalText = new PdfPCell(new Phrase("Total price:", headerFont));
+        totalText.setColspan(3);
+        totalText.setBorder(Rectangle.TOP);
+        table.addCell(totalText);
+
+        PdfPCell totalCell = new PdfPCell(new Phrase(String.format("%.2f EUR", round(foodGross + drinkGross, 2)), headerFont));
+        totalCell.setColspan(1);
+        totalCell.setHorizontalAlignment(Element.ALIGN_MIDDLE);
+        totalCell.setBorder(Rectangle.TOP);
+        table.addCell(totalCell);
+
+        return table;
+    }
+
+    private double computeTotal(Map<Dish, Integer> count) {
+        return count.entrySet().stream()
+            .mapToDouble(e -> e.getKey().getPrice() * e.getValue() / 100.0)
+            .sum();
+    }
+
+    private void drawFooter(Document document, PdfWriter writer, Font font, ApplicationUser user) {
+        PdfContentByte canvas = writer.getDirectContent();
+        canvas.moveTo(80, document.bottom() + 10);
+        canvas.lineTo(520, document.bottom() + 10);
+        canvas.stroke();
+
+        Rectangle page = document.getPageSize();
+        PdfPTable footerTable = new PdfPTable(1);
+        footerTable.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
+        footerTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+        footerTable.addCell(new Phrase("Thank you for your visit!", font));
+        footerTable.addCell(new Phrase("You have been served by " + user.getFirstName() + " " + user.getLastName(), font));
+        footerTable.setTotalWidth(page.getWidth() - document.leftMargin() - document.rightMargin());
+        footerTable.writeSelectedRows(0, -1, 40, document.bottomMargin() + 5, canvas);
+    }
+
+    private double round(double value, int places) {
+        double scale = Math.pow(10, places);
+        return Math.round(value * scale) / scale;
+    }
+
 
     @Override
     @Transactional
-    public void saveBill(String filename, Long invoiceId, LocalDateTime paidAt, double price, String reservationStartedAt, String servedTables) throws IOException {
+    public void saveBill(String filename,
+                         Long invoiceId,
+                         LocalDateTime paidAt,
+                         double price,
+                         String reservationStartedAt,
+                         String servedTables) throws IOException {
 
-        byte[] input_file = Files.readAllBytes(Paths.get(filename));
-        byte[] encodedBytes = Base64.getEncoder().encode(input_file);
-        Bill bill = new Bill(invoiceId, encodedBytes, paidAt, price);
+        byte[] pdfBytes = Files.readAllBytes(Paths.get(filename));
+
+        Bill bill = new Bill(invoiceId, pdfBytes, paidAt, price);
         bill.setReservationStartedAt(reservationStartedAt);
         bill.setServedTables(servedTables);
 
         if (billRepository.findByInvoiceId(invoiceId) == null) {
-            LOGGER.info("Billing");
             billRepository.save(bill);
         }
-        File file = new File(filename);
-        if (file.delete()) {
-            LOGGER.info("Deleted bill");
-        } else {
-            LOGGER.info("Not deleted successfully!");
-        }
+
+        Files.deleteIfExists(Paths.get(filename));
     }
+
 
     @Override
     public List<Bill> getAllBills() {
@@ -293,6 +300,7 @@ public class SimpleBillService implements BillService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Bill getBillByInvoiceId(Long invoiceId) {
         LOGGER.info("Finding Bill for invoice id {}", invoiceId);
         return billRepository.findByInvoiceId(invoiceId);
