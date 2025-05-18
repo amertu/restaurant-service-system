@@ -4,8 +4,8 @@
 [![Frontend Build](https://img.shields.io/github/actions/workflow/status/amertu/restaurant-service-system/azure-static-web-apps-jolly-coast-0df939010.yml?branch=master&label=frontend-build&logo=github)](https://github.com/amertu/restaurant-service-system/actions/workflows/azure-static-web-apps-jolly-coast-0df939010.yml)
 
 
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.2.6-brightgreen?logo=spring&logoColor=white)
-![Java](https://img.shields.io/badge/Java-11-red?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7.18-brightgreen?logo=spring&logoColor=white)
+![Java](https://img.shields.io/badge/Java-17-red?logo=openjdk&logoColor=white)
 ![UML](https://img.shields.io/badge/UML-FABD14?logo=uml&logoColor=white)
 ![Angular](https://img.shields.io/badge/Angular-19.0.0-2E2E2E?logo=angular&logoColor=white)
 ![HTML5](https://img.shields.io/badge/HTML-5-orange?logo=html5&logoColor=white)
