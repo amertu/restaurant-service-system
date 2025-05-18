@@ -7,8 +7,9 @@ import com.spring.restaurant.backend.endpoint.mapper.RestaurantTableMapper;
 import com.spring.restaurant.backend.entity.RestaurantTable;
 import com.spring.restaurant.backend.exception.ValidationException;
 import com.spring.restaurant.backend.service.RestaurantTableService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 @RequestMapping(value = "/api/v1/tables")
+@Tag(name = "Tables")
+@Secured("ROLE_ADMIN")
+@Slf4j
 public class RestaurantTableEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private static final String PATH = "/api/v1/tables";
@@ -39,14 +43,14 @@ public class RestaurantTableEndpoint {
     }
 
     @GetMapping
-    @ApiOperation(value = "Get list of tables", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get list of tables")
     public List<RestaurantTableDto> findAll() {
         LOGGER.info("GET " + PATH);
         return restaurantTableMapper.restaurantTableEntityToDto(restaurantTableService.findAll());
     }
 
     @GetMapping(value = "/{id}")
-    @ApiOperation(value = "Get a table by ID", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get a table by ID")
     public RestaurantTableDto findOne(@PathVariable Long id) {
         LOGGER.info("GET " + PATH + "/{}", id);
         return restaurantTableMapper.restaurantTableEntityToDto(restaurantTableService.findOne(id));
@@ -54,7 +58,7 @@ public class RestaurantTableEndpoint {
 
     @Secured("ROLE_ADMIN")
     @PostMapping
-    @ApiOperation(value = "Add a new table", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Add a new table")
     public RestaurantTableDto add(@Valid @RequestBody RestaurantTableDto tableDto) {
         LOGGER.info("POST " + PATH + " message body: {}", tableDto);
         return restaurantTableMapper.restaurantTableEntityToDto(restaurantTableService.add(restaurantTableMapper.restaurantTableDtoToEntity(tableDto)));
@@ -62,7 +66,7 @@ public class RestaurantTableEndpoint {
 
     @Secured("ROLE_ADMIN")
     @PostMapping(value = "/clone/{id}")
-    @ApiOperation(value = "Create a cloned version of table identified by supplied id and set its tableNum to the next available tableNum", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Create a cloned version of table identified by supplied id and set its tableNum to the next available tableNum")
     public RestaurantTableDto clone(@PathVariable Long id) {
         LOGGER.info("POST " + PATH + "/clone/{}", id);
         return restaurantTableMapper.restaurantTableEntityToDto(restaurantTableService.clone(id));
@@ -70,7 +74,7 @@ public class RestaurantTableEndpoint {
 
     @Secured("ROLE_ADMIN")
     @PutMapping
-    @ApiOperation(value = "Update an existing table", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Update an existing table")
     public RestaurantTableDto update(@Valid @RequestBody RestaurantTableDto tableDto) {
         LOGGER.info("PUT " + PATH + " message body: {}", tableDto);
         return restaurantTableMapper.restaurantTableEntityToDto(restaurantTableService.update(restaurantTableMapper.restaurantTableDtoToEntity(tableDto)));
@@ -78,7 +82,7 @@ public class RestaurantTableEndpoint {
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping(value = "/{id}")
-    @ApiOperation(value = "Delete a table by id", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Delete a table by id")
     public void delete(@PathVariable Long id) {
         LOGGER.info("DELETE " + PATH + "/{}", id);
         restaurantTableService.delete(id);
@@ -86,7 +90,7 @@ public class RestaurantTableEndpoint {
 
     @Secured("ROLE_USER")
     @PatchMapping
-    @ApiOperation(value = "update a tables active status", authorizations = {@Authorization(value = "apiKey")})//TODO: change value maybe?
+    @Operation(summary = "update a tables active status")//TODO: change value maybe?
     public RestaurantTableDto setActive(@Valid @RequestBody RestaurantTableStatusDto partialUpdate) {
         LOGGER.info("PATCH " + PATH + "message body: {}", partialUpdate);
         return restaurantTableMapper.restaurantTableEntityToDto(
@@ -95,7 +99,7 @@ public class RestaurantTableEndpoint {
 
     @Secured("ROLE_ADMIN")
     @PatchMapping(value="/coordinates")
-    @ApiOperation(value = "update a tables coordinates", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get all waiters")
     public RestaurantTableDto setCoordinates(@Valid @RequestBody RestaurantTableCoordinatesDto partialUpdate) {
         LOGGER.info("PATCH " + PATH + "/coordinates message body: {}", partialUpdate);
         return restaurantTableMapper.restaurantTableEntityToDto(
@@ -108,7 +112,7 @@ public class RestaurantTableEndpoint {
         method = GET
     )
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Find tables for number of guests as a suggestion for where to place the guests..", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get all waiters")
     public List<RestaurantTableDto> findTableSuggestion(@RequestParam(value = "numberOfGuests") Integer numberOfGuests, @RequestParam(value="idOfReservationToIgnore", required = false) Long idOfReservationToIgnore, @RequestParam(value="startDateTime")  String startDateTime, @RequestParam(value="endDateTime")  String endDateTime){
 
         LOGGER.info("GET "+ PATH + "/");

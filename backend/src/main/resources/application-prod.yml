@@ -20,5 +20,3 @@ logging:
   level:
     root: WARN
     org.springframework.web: ERROR
-
-# Any additional prod-specific settings like security or caching can go here

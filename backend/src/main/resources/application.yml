@@ -38,15 +38,11 @@ security:
     prefix: "Bearer "
     login-uri: /api/v1/authentication
     white-list:
-      # Browser requests
       - /
       - /favicon.ico
       - /csrf
-      # Swagger
-      - /v2/api-docs
-      - /swagger-resources/**
-      - /webjars/**
-      - /swagger-ui.html
+      - /v3/api-docs/**
+      - /swagger-ui/**
   jwt:
     # Use http://www.allkeysgenerator.com/ to generate secrets
     secret: ${JWT_SECRET}
@@ -56,10 +52,15 @@ security:
     # 12 hours in milliseconds
     expiration-time: 43200000
 
-
-
 devtools:
   restart:
     enabled: false
   livereload:
     enabled: false
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+    enabled: true

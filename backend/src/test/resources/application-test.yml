@@ -25,7 +25,6 @@ security:
     prefix: "Bearer "
     login-uri: /api/v1/authentication
     white-list:
-      # Browser requests
       - /
       - /favicon.ico
       - /csrf

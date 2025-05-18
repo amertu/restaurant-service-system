@@ -3,8 +3,9 @@ package com.spring.restaurant.backend.endpoint;
 import com.spring.restaurant.backend.endpoint.dto.FloorLayoutDto;
 import com.spring.restaurant.backend.endpoint.mapper.FloorLayoutMapper;
 import com.spring.restaurant.backend.service.FloorLayoutService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ import java.lang.invoke.MethodHandles;
 
 @RestController
 @RequestMapping(value = "/api/v1/layout")
+@Tag(name = "FloorLayout")
+@Secured("ROLE_ADMIN")
+@Slf4j
 public class FloorLayoutEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private static final String PATH = "/api/v1/layout";
@@ -29,7 +33,7 @@ public class FloorLayoutEndpoint {
     }
 
     @GetMapping(value = "/{id}")
-    @ApiOperation(value = "Get layout with ID", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get layout with ID")
     public FloorLayoutDto findOne(@PathVariable Long id) {
         LOGGER.info("GET " + PATH + "/{}", id);
         return floorLayoutMapper.floorLayoutEntityToFloorLayoutDto(floorLayoutService.findLayout(id));
@@ -37,7 +41,7 @@ public class FloorLayoutEndpoint {
 
     @Secured("ROLE_ADMIN")
     @PostMapping
-    @ApiOperation(value = "Add a new layout", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Add a new layout")
     public FloorLayoutDto add(@Valid @RequestBody FloorLayoutDto floorLayoutDto) {
         LOGGER.info("POST " + PATH);
         return floorLayoutMapper.floorLayoutEntityToFloorLayoutDto(
@@ -46,7 +50,7 @@ public class FloorLayoutEndpoint {
     }
     @Secured("ROLE_USER")
     @PatchMapping
-    @ApiOperation(value = "update layout", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "update layout")
     public FloorLayoutDto update(@Valid @RequestBody FloorLayoutDto floorLayoutDto) {
         LOGGER.info("PATCH " + PATH +" with id {}", floorLayoutDto.getId());
         return floorLayoutMapper.floorLayoutEntityToFloorLayoutDto(

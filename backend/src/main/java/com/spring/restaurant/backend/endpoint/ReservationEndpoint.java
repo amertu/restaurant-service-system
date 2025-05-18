@@ -5,8 +5,9 @@ import com.spring.restaurant.backend.endpoint.mapper.ReservationMapper;
 import com.spring.restaurant.backend.entity.Reservation;
 import com.spring.restaurant.backend.exception.ValidationException;
 import com.spring.restaurant.backend.service.ReservationService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @RestController
 @RequestMapping(ReservationEndpoint.BASE_URL)
+@Tag(name = "Reservation")
+@Secured("ROLE_ADMIN")
+@Slf4j
 public class ReservationEndpoint {
 
     static final String BASE_URL = "/api/v1/reservations";
@@ -41,7 +45,7 @@ public class ReservationEndpoint {
 
     @Secured("ROLE_USER")
     @GetMapping
-    @ApiOperation(value = "Get list of reservations without details", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get list of reservations without details")
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationDto> findAll() {
         LOGGER.info("GET {}", BASE_URL);
@@ -55,7 +59,7 @@ public class ReservationEndpoint {
         params = { "startDateTime", "endDateTime" },
         method = GET
     )
-    @ApiOperation(value = "Get list of reservations within given time range", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get list of reservations within given time range")
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationDto> findByStartAndEndDateTime(@RequestParam(value="startDateTime")  String startDateTime, @RequestParam(value="endDateTime")  String endDateTime) {
 
@@ -81,7 +85,7 @@ public class ReservationEndpoint {
 
     @Secured("ROLE_USER")
     @GetMapping(value = "/{id}")
-    @ApiOperation(value = "Get a reservation by ID", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "et a reservation by ID")
     public ReservationDto findOne(@PathVariable Long id) {
         LOGGER.info("GET " + BASE_URL + "/{}", id);
         return reservationMapper.reservationToReservationDto(reservationService.findOne(id));
@@ -90,7 +94,7 @@ public class ReservationEndpoint {
 
     @Secured("ROLE_USER")
     @PutMapping
-    @ApiOperation(value = "Update an existing reservation", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Update an existing reservation")
     public ReservationDto update(@Valid @RequestBody ReservationDto reservationDto) {
         LOGGER.info("PUT " + BASE_URL + " message body: {}", reservationDto);
         Reservation reservation = reservationMapper.reservationDtoToReservation(reservationDto);
@@ -100,7 +104,7 @@ public class ReservationEndpoint {
     @Secured("ROLE_USER")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "Post a reservation", authorizations = {@Authorization(value = "apiKey")}) // TODO read about annotation
+    @Operation(summary = "Post a reservation")
     public ReservationDto createReservation(@RequestBody ReservationDto reservationDto) {
 
         LOGGER.info("POST " + BASE_URL);
@@ -110,12 +114,11 @@ public class ReservationEndpoint {
 
         createdReservation = reservationService.createReservation(reservationToCreate);
         return reservationMapper.reservationToReservationDto(createdReservation);
-
     }
 
     @Secured("ROLE_USER")
     @DeleteMapping(value = "/{id}")
-    @ApiOperation(value = "Delete a reservation by id", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Delete a reservation by id")
     public void deleteReservationById(@PathVariable("id") Long id) {
         LOGGER.info("DELETE " + BASE_URL + "/{}", id);
         reservationService.deleteReservationById(id);
@@ -124,7 +127,7 @@ public class ReservationEndpoint {
     @Secured("ROLE_USER")
     @GetMapping(value = "/filter")
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Filter reservations by params", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Filter reservations by params")
     public List<ReservationDto> search(@RequestParam(required = false) String guestName,
                                        @RequestParam(required = false) String startDateTime,
                                        @RequestParam(required = false) String endDateTime,
@@ -138,6 +141,4 @@ public class ReservationEndpoint {
         List<Reservation> filteredReservations = reservationService.search(guestName, startDateTime, endDateTime, tableNum);
         return reservationMapper.reservationToReservationDto(filteredReservations);
     }
-
-
 }

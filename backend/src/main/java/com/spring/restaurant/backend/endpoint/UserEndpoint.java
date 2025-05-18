@@ -7,8 +7,9 @@ import com.spring.restaurant.backend.entity.ApplicationUser;
 import com.spring.restaurant.backend.exception.NotFoundException;
 import com.spring.restaurant.backend.exception.UserExistException;
 import com.spring.restaurant.backend.service.UserService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@Tag(name = "Users")
+@Secured("ROLE_ADMIN")
+@Slf4j
 public class UserEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -40,8 +44,7 @@ public class UserEndpoint {
     // TODO: this should be renamed, since 'waiter' doesn't fit its purpose (--> getNonAdmins)
     @Secured("ROLE_ADMIN")
     @GetMapping(value = "/waiters")
-    @ApiOperation(value = "Get all informations about all waiters",
-        authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get all waiters")
     public List<UserRegisterDto> getAllWaiters() {
         LOGGER.info("GET /api/v1/users/waiters");
         try {
@@ -60,8 +63,7 @@ public class UserEndpoint {
     @Secured("ROLE_ADMIN")
     @PutMapping(value = "/changeUserBlockedValue/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Change the blocked value of a user",
-        authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Change the blocked flag of a user")
     public int changeUserBlockedValue(@PathVariable Long id, @Valid @RequestBody UserRegisterDto blockedUser){
         LOGGER.info("PUT /api/v1/users/changeUserBlockedValue/{}",id);
         try {
@@ -76,7 +78,7 @@ public class UserEndpoint {
     @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    @ApiOperation(value = "Create a new User")
+    @Operation(summary = "Create a new user")
     public void registerNewUser(@RequestBody UserRegisterDto userRegisterDto) {
         LOGGER.info("POST /api/v1/users body: {}", userRegisterDto);
         try {
@@ -91,7 +93,7 @@ public class UserEndpoint {
     @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    @ApiOperation(value = "Get all Users", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get all users")
     public List<UserRegisterDto> getAllUsers() {
         LOGGER.info("GET /api/v1/users");
         try {
@@ -108,8 +110,7 @@ public class UserEndpoint {
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping(value = "/{email}")
-    @ApiOperation(value = "Delete user by E-mail",
-        authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Delete user by E-mail")
     public UserRegisterDto deleteUserAsAdminByEmail(@Valid @PathVariable("email") String userToDelete,
                                                     @RequestParam(value = "userPerformingAction", required = false) String emailAdmin) {
         LOGGER.info("DELETE /api/v1/users/{}", userToDelete);
@@ -129,8 +130,7 @@ public class UserEndpoint {
     @Secured("ROLE_ADMIN")
     @PutMapping(value = "/{id}/passwordReset")
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "Reset password of a user",
-        authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Reset password of a user")
     public int resetUserPassword (@PathVariable("id") Long id, @Valid @RequestBody UserRegisterDto user) {
         LOGGER.info("PUT /api/v1/users/{}/passwordReset", id);
         LOGGER.info(user.toString());
@@ -146,8 +146,7 @@ public class UserEndpoint {
     @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
-    @ApiOperation(value = "Update user by Id",
-        authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Update user by Id")
     public void updateUser(@RequestBody ApplicationUserDto user) {
         LOGGER.info("PUT /api/v1/user" + " message body: {}", user);
         try {
@@ -160,8 +159,7 @@ public class UserEndpoint {
     @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/{userId}")
-    @ApiOperation(value = "Get user by Id",
-        authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get user by Id")
     public ApplicationUserDto getUserById(@Valid @PathVariable("userId") Long id) {
         LOGGER.info("GET /api/v1/user/{}", id);
         ApplicationUser searchResult = userService.findApplicationUserById(id);

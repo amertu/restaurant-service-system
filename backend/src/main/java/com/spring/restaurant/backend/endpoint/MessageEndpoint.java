@@ -5,8 +5,9 @@ import com.spring.restaurant.backend.endpoint.dto.MessageInquiryDto;
 import com.spring.restaurant.backend.endpoint.dto.SimpleMessageDto;
 import com.spring.restaurant.backend.endpoint.mapper.MessageMapper;
 import com.spring.restaurant.backend.service.MessageService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/messages")
+@Tag(name = "Messages")
+@Secured("ROLE_ADMIN")
+@Slf4j
 public class MessageEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -33,27 +37,26 @@ public class MessageEndpoint {
     }
 
     @GetMapping
-    @ApiOperation(value = "Get list of messages without details", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Get list of messages without details")
     public List<SimpleMessageDto> findAll() {
         LOGGER.info("GET /api/v1/messages");
         return messageMapper.messageToSimpleMessageDto(messageService.findAll());
     }
 
-    @GetMapping(value = "/{id}")
-    @ApiOperation(value = "Get detailed information about a specific message",
-        authorizations = {@Authorization(value = "apiKey")})
-    public DetailedMessageDto find(@PathVariable Long id) {
-        LOGGER.info("GET /api/v1/messages/{}", id);
-        return messageMapper.messageToDetailedMessageDto(messageService.findOne(id));
-    }
-
     @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    @ApiOperation(value = "Publish a new message", authorizations = {@Authorization(value = "apiKey")})
+    @Operation(summary = "Publish a new message")
     public DetailedMessageDto create(@Valid @RequestBody MessageInquiryDto messageDto) {
         LOGGER.info("POST /api/v1/messages body: {}", messageDto);
         return messageMapper.messageToDetailedMessageDto(
             messageService.publishMessage(messageMapper.messageInquiryDtoToMessage(messageDto)));
+    }
+
+    @GetMapping(value = "/{id}")
+    @Operation(summary = "Get detailed information about a specific message")
+    public DetailedMessageDto find(@PathVariable Long id) {
+        LOGGER.info("GET /api/v1/messages/{}", id);
+        return messageMapper.messageToDetailedMessageDto(messageService.findOne(id));
     }
 }
