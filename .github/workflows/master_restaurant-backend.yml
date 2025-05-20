@@ -23,7 +23,12 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'microsoft'
+          distribution: 'temurin'
+
+      - name: Set up Maven
+        uses: s4u/setup-maven-action@v1
+        with:
+          maven-version: '3.10.1'
 
       - name: Build backend (skip tests)
         run: mvn clean install -DskipTests
