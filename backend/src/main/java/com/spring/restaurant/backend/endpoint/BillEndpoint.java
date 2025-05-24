@@ -19,7 +19,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.xml.bind.ValidationException;
+import jakarta.xml.bind.ValidationException;
+
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 
@@ -51,9 +52,7 @@ public class BillEndpoint {
     public List<PurchaseDto> buyDishes(@RequestBody BillDto billDto, @PathVariable("invoiceNumber") String invoiceId) {
         LOGGER.info("PUT /api/v1/bills/{}", invoiceId);
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username = "";
-        String reservationStartedAt = null;
-        String servedTables = "";
+        String username;
         if (principal instanceof UserDetails) {
             username = ((UserDetails) principal).getUsername();
         } else {
@@ -68,11 +67,11 @@ public class BillEndpoint {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping
+    @GetMapping({"", "/"})
     @Operation(summary = "Get all Bills")
     public List<BillDto> getAllBills() {
         LOGGER.info("GET /api/v1/bills");
-        LOGGER.info("" + billMapper.billsToBillDtos(billService.getAllBills()));
+        LOGGER.info("{}", billMapper.billsToBillDtos(billService.getAllBills()));
         return billMapper.billsToBillDtos(billService.getAllBills());
     }
 

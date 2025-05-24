@@ -17,7 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,7 +43,7 @@ public class RestaurantTableEndpoint {
         this.restaurantTableMapper = restaurantTableMapper;
     }
 
-    @GetMapping
+    @GetMapping({"", "/"})
     @Operation(summary = "Get list of tables")
     public List<RestaurantTableDto> findAll() {
         LOGGER.info("GET " + PATH);
@@ -98,7 +99,7 @@ public class RestaurantTableEndpoint {
     }
 
     @Secured("ROLE_ADMIN")
-    @PatchMapping(value="/coordinates")
+    @PatchMapping(value = "/coordinates")
     @Operation(summary = "Get all waiters")
     public RestaurantTableDto setCoordinates(@Valid @RequestBody RestaurantTableCoordinatesDto partialUpdate) {
         LOGGER.info("PATCH " + PATH + "/coordinates message body: {}", partialUpdate);
@@ -108,14 +109,14 @@ public class RestaurantTableEndpoint {
 
     @Secured("ROLE_USER")
     @RequestMapping(
-        params = { "numberOfGuests", "idOfReservationToIgnore", "startDateTime", "endDateTime" },
+        params = {"numberOfGuests", "idOfReservationToIgnore", "startDateTime", "endDateTime"},
         method = GET
     )
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all waiters")
-    public List<RestaurantTableDto> findTableSuggestion(@RequestParam(value = "numberOfGuests") Integer numberOfGuests, @RequestParam(value="idOfReservationToIgnore", required = false) Long idOfReservationToIgnore, @RequestParam(value="startDateTime")  String startDateTime, @RequestParam(value="endDateTime")  String endDateTime){
+    public List<RestaurantTableDto> findTableSuggestion(@RequestParam(value = "numberOfGuests") Integer numberOfGuests, @RequestParam(value = "idOfReservationToIgnore", required = false) Long idOfReservationToIgnore, @RequestParam(value = "startDateTime") String startDateTime, @RequestParam(value = "endDateTime") String endDateTime) {
 
-        LOGGER.info("GET "+ PATH + "/");
+        LOGGER.info("GET " + PATH + "/");
         LOGGER.info("findTableSuggestion(.)");
         LOGGER.info("idOfReservationToIgnore{}", idOfReservationToIgnore);
         LOGGER.info("numberOfGuests: {}", numberOfGuests);
@@ -125,18 +126,17 @@ public class RestaurantTableEndpoint {
         LocalDateTime start;
         LocalDateTime end;
 
-        try{
+        try {
             start = LocalDateTime.parse(startDateTime, DateTimeFormatter.ISO_DATE_TIME);
             end = LocalDateTime.parse(endDateTime, DateTimeFormatter.ISO_DATE_TIME);
 
-        } catch( Exception ex){
+        } catch (Exception ex) {
             throw new ValidationException("Failed to parse DateTime.", ex);
         }
 
         List<RestaurantTable> suggestedTables = restaurantTableService.findTableSuggestion(numberOfGuests, idOfReservationToIgnore, start, end);
         return restaurantTableMapper.restaurantTableEntityToDto(suggestedTables);
     }
-
 
 
 }

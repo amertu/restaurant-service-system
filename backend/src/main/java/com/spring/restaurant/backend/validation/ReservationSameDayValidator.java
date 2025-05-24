@@ -2,8 +2,8 @@ package com.spring.restaurant.backend.validation;
 
 import com.spring.restaurant.backend.entity.Reservation;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 

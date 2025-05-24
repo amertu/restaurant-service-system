@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import javax.xml.bind.ValidationException;
+import jakarta.xml.bind.ValidationException;
 import java.util.List;
 
 public interface UserService extends UserDetailsService {

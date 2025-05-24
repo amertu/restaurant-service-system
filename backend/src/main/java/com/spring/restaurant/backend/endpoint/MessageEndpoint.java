@@ -15,7 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class MessageEndpoint {
         this.messageMapper = messageMapper;
     }
 
-    @GetMapping
+    @GetMapping({"", "/"})
     @Operation(summary = "Get list of messages without details")
     public List<SimpleMessageDto> findAll() {
         LOGGER.info("GET /api/v1/messages");

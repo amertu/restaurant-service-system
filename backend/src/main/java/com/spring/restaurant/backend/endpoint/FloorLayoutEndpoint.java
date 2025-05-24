@@ -12,7 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+
 import java.lang.invoke.MethodHandles;
 
 @RestController
@@ -48,11 +49,12 @@ public class FloorLayoutEndpoint {
             floorLayoutService.add(floorLayoutMapper.floorLayoutDtoToFloorLayoutEntity(floorLayoutDto))
         );
     }
+
     @Secured("ROLE_USER")
     @PatchMapping
     @Operation(summary = "update layout")
     public FloorLayoutDto update(@Valid @RequestBody FloorLayoutDto floorLayoutDto) {
-        LOGGER.info("PATCH " + PATH +" with id {}", floorLayoutDto.getId());
+        LOGGER.info("PATCH " + PATH + " with id {}", floorLayoutDto.getId());
         return floorLayoutMapper.floorLayoutEntityToFloorLayoutDto(
             floorLayoutService.update(floorLayoutMapper.floorLayoutDtoToFloorLayoutEntity(floorLayoutDto))
         );

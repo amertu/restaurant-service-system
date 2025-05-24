@@ -19,9 +19,9 @@ public interface UserMapper {
     UserRegisterDto applicationUserToUserRegisterDto(ApplicationUser applicationUser);
 
     /**
-     * This method converts an userRegister DTO in an applicationUser Entity.
+     * This method converts a userRegister DTO in an applicationUser Entity.
      *
-     * @param userRegisterDto the DTO which has to be converted.
+     * @param userRegisterDto the DTO, which has to be converted.
      * @return the converted Entity.
      */
     ApplicationUser userRegisterToApplicationUser(UserRegisterDto userRegisterDto);

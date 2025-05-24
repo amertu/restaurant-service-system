@@ -1,6 +1,6 @@
 package com.spring.restaurant.backend.endpoint.dto;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.Objects;
 
 //used for updates of active field of table entity, so that not all fields of table have to be updated

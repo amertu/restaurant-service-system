@@ -4,7 +4,7 @@ import com.spring.restaurant.backend.entity.ApplicationUser;
 import com.spring.restaurant.backend.entity.Bill;
 import com.spring.restaurant.backend.entity.Purchase;
 
-import javax.xml.bind.ValidationException;
+import jakarta.xml.bind.ValidationException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;

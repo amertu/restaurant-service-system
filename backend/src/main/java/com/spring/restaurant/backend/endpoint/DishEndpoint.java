@@ -13,7 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 
@@ -34,15 +35,15 @@ public class DishEndpoint {
         this.dishMapper = dishMapper;
     }
 
-    @Secured({"ROLE_ADMIN","ROLE_USER"})
-    @GetMapping
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
+    @GetMapping({"", "/"})
     @Operation(summary = "Get list of dishes")
     public List<DishDto> findAll() {
         LOGGER.info("GET " + BASE_URL);
         return dishMapper.dishEntitiesToDto(dishService.findAll());
     }
 
-    @Secured({"ROLE_ADMIN","ROLE_USER"})
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @GetMapping(value = "/{id}")
     @Operation(summary = "Get a dish by ID")
     public DishDto findOne(@PathVariable Long id) {
@@ -50,7 +51,7 @@ public class DishEndpoint {
         return dishMapper.dishEntityToDto(dishService.findOne(id));
     }
 
-    @Secured({"ROLE_ADMIN","ROLE_USER"})
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a new dish")
@@ -59,7 +60,7 @@ public class DishEndpoint {
         return dishMapper.dishEntityToDto(dishService.add(dishMapper.dishDtoToEntity(dishDto)));
     }
 
-    @Secured({"ROLE_ADMIN","ROLE_USER"})
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @PutMapping
     @Operation(summary = "Update an existing dish")
     public DishDto update(@Valid @RequestBody DishDto dishDto) {
@@ -67,7 +68,7 @@ public class DishEndpoint {
         return dishMapper.dishEntityToDto(dishService.update(dishMapper.dishDtoToEntity(dishDto)));
     }
 
-    @Secured({"ROLE_ADMIN","ROLE_USER"})
+    @Secured({"ROLE_ADMIN", "ROLE_USER"})
     @DeleteMapping(value = "/{id}")
     @Operation(summary = "Delete a dish by id")
     public void delete(@PathVariable Long id) {

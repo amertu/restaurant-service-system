@@ -5,6 +5,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,14 +17,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,13 +62,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             throw new IllegalArgumentException("Token must start with 'Bearer'");
         }
 
-        Key key = Keys.hmacShaKeyFor(securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8));
+        SecretKey key = Keys.hmacShaKeyFor(securityProperties.getJwtSecret().getBytes(StandardCharsets.UTF_8));
 
-        Claims claims = Jwts.parserBuilder()
-            .setSigningKey(key)
+        Claims claims =  Jwts.parser()
+            .verifyWith(key)
             .build()
-            .parseClaimsJws(token.replace(securityProperties.getAuthTokenPrefix(), ""))
-            .getBody();
+            .parseSignedClaims(token.replace(securityProperties.getAuthTokenPrefix(), ""))
+            .getPayload();
 
         String username = claims.getSubject();
 

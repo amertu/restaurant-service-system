@@ -1,8 +1,8 @@
 package com.spring.restaurant.backend.entity;
 
 
-import javax.persistence.*;
-import javax.validation.constraints.Min;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import java.util.Objects;
 import java.util.Set;
 
@@ -117,7 +117,7 @@ public class RestaurantTable {
         private String posDescription;
         private Boolean active;
 
-        private RestaurantTableBuilder() {
+        public RestaurantTableBuilder() {
         }
 
         public static RestaurantTableBuilder aTable() {

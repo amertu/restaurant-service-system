@@ -11,9 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.ValidatorFactory;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.ValidatorFactory;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,7 +29,7 @@ public class Validator {
 
 
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    javax.validation.Validator validator = factory.getValidator();
+    jakarta.validation.Validator validator = factory.getValidator();
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 
@@ -54,10 +54,10 @@ public class Validator {
 
         Set<ConstraintViolation<Reservation>> violations = validator.validate(reservation);
 
-        if (0 != violations.size()) {
-            String violationLog = "";
+        if (!violations.isEmpty()) {
+            StringBuilder violationLog = new StringBuilder();
             for (ConstraintViolation<Reservation> violation : violations) {
-                violationLog += " " + violation.getMessage() + "\n";
+                violationLog.append(" ").append(violation.getMessage()).append("\n");
             }
 
             logErrorAndThrow(new ValidationException( VALIDATION_ERROR_PREFIX + violationLog));
@@ -85,9 +85,7 @@ public class Validator {
         //TODO this seems to be the easiest solution to implement it. But maybe (also) another JDBC query might need to be provided, checking all tables.
         List<Reservation> conflictingReservations = findConflictingReservations(reservation, reservationRepository);
 
-        if( conflictingReservations.isEmpty() ){
-            // OK: No conflicting reservations detected.
-        } else {
+        if (!conflictingReservations.isEmpty()) {
             String conflictingReservationsString = getUserFriendlyRepresentationFor(conflictingReservations);
             logErrorAndThrow(new ValidationException(VALIDATION_ERROR_PREFIX + "The following conflicting reservations were detected: \n" + conflictingReservationsString));
         }
@@ -105,25 +103,24 @@ public class Validator {
         //TODO this seems to be the easiest solution to implement it. But maybe (also) another JDBC query might need to be provided, checking all tables.
         List<Reservation> allConflictingReservations = findConflictingReservations(reservation, reservationRepository);
 
-        List<Reservation> conflictingReservationsExceptIngoredReservation = getConflictingReservationsWithoutId(reservation.getId(), allConflictingReservations);
+        List<Reservation> conflictingReservationsExceptIgnoredReservation = getConflictingReservationsWithoutId(reservation.getId(), allConflictingReservations);
 
-        if( conflictingReservationsExceptIngoredReservation.isEmpty() ){
-            // OK: No conflicting reservations detected.
-        } else {
-            String conflictingReservationsString = getUserFriendlyRepresentationFor(conflictingReservationsExceptIngoredReservation);
+        if (!conflictingReservationsExceptIgnoredReservation.isEmpty()) {
+            String conflictingReservationsString = getUserFriendlyRepresentationFor(conflictingReservationsExceptIgnoredReservation);
             logErrorAndThrow(new ValidationException(VALIDATION_ERROR_PREFIX + "The following conflicting reservations were detected: \n" + conflictingReservationsString));
         }
     }
 
-    public void validateNumberOfGuests(Integer numberOfGuests){
-        if(null == numberOfGuests){
-            logErrorAndThrow(new ValidationException("The number of guests must not be null."));
-        }
-
-        if(numberOfGuests < 1){
-            logErrorAndThrow(new ValidationException("The number of guests must be >= 1."));
+    public void validateNumberOfGuests(Integer numberOfGuests) {
+        if (numberOfGuests == null || numberOfGuests < 1) {
+            String message = (numberOfGuests == null)
+                ? "Number of guests must not be null."
+                : "Number of guests must be >= 1.";
+            logErrorAndThrow(new ValidationException(message));
         }
     }
+
+
 
 
     private String getUserFriendlyRepresentationFor(List<Reservation> conflictingReservations){
@@ -132,7 +129,7 @@ public class Validator {
 
         for(int i=0; i<conflictingReservations.size(); i++){
             result.append("\n");
-            result.append(( (i+1) + "."));
+            result.append((i + 1)).append(".");
             result.append(conflictingReservations.get(i).toUserFriendlyString());
         }
 
@@ -143,7 +140,7 @@ public class Validator {
     private List<Reservation> getConflictingReservationsWithoutId(Long idOfReservationToBeIgnored, List<Reservation> allConflictingReservations){
         List<Reservation> conflictingReservationsExceptIngoredReservation = new ArrayList<Reservation>();
         for(Reservation r:allConflictingReservations){
-            if( r.getId() != idOfReservationToBeIgnored){
+            if(!Objects.equals(r.getId(), idOfReservationToBeIgnored)){
                 conflictingReservationsExceptIngoredReservation.add(r);
             }
         }
@@ -181,9 +178,8 @@ public class Validator {
             logErrorAndThrow(new ValidationException("The end time must not be null"));
         }
 
-        if(endDateTime.isAfter(startDateTime)){
-            // OK
-        }else{
+        assert endDateTime != null;
+        if (!endDateTime.isAfter(startDateTime)) {
             logErrorAndThrow(new ValidationException("The end time must be after the start time."));
         }
     }

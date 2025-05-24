@@ -15,7 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -44,7 +45,7 @@ public class ReservationEndpoint {
 
 
     @Secured("ROLE_USER")
-    @GetMapping
+    @GetMapping({"", "/"})
     @Operation(summary = "Get list of reservations without details")
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationDto> findAll() {
@@ -53,29 +54,28 @@ public class ReservationEndpoint {
     }
 
 
-
     @Secured("ROLE_USER")
     @RequestMapping(
-        params = { "startDateTime", "endDateTime" },
+        params = {"startDateTime", "endDateTime"},
         method = GET
     )
     @Operation(summary = "Get list of reservations within given time range")
     @ResponseStatus(HttpStatus.OK)
-    public List<ReservationDto> findByStartAndEndDateTime(@RequestParam(value="startDateTime")  String startDateTime, @RequestParam(value="endDateTime")  String endDateTime) {
+    public List<ReservationDto> findByStartAndEndDateTime(@RequestParam(value = "startDateTime") String startDateTime, @RequestParam(value = "endDateTime") String endDateTime) {
 
-        LOGGER.info("GET "+ BASE_URL);
+        LOGGER.info("GET " + BASE_URL);
         LOGGER.info("findByStartAndEndDateTime(.)");
         LOGGER.info("startDateTime: {}", startDateTime);
         LOGGER.info("endDateTIme: {}", endDateTime);
 
-        LocalDateTime start = null;
-        LocalDateTime end = null;
+        LocalDateTime start;
+        LocalDateTime end;
 
-        try{
+        try {
             start = LocalDateTime.parse(startDateTime, DateTimeFormatter.ISO_DATE_TIME);
             end = LocalDateTime.parse(endDateTime, DateTimeFormatter.ISO_DATE_TIME);
 
-        } catch( Exception ex){
+        } catch (Exception ex) {
             throw new ValidationException("Failed to parse DateTime.", ex);
         }
 
@@ -132,11 +132,7 @@ public class ReservationEndpoint {
                                        @RequestParam(required = false) String startDateTime,
                                        @RequestParam(required = false) String endDateTime,
                                        @RequestParam(required = false) Long tableNum) {
-        LOGGER.info("GET " + BASE_URL + "/filter"
-            + "?guestName=" + guestName
-            + "&startDateTime=" + startDateTime
-            + "&endDateTime=" + endDateTime
-            + "&tableNum=" + tableNum);
+        LOGGER.info("GET " + BASE_URL + "/filter?guestName={}&startDateTime={}&endDateTime={}&tableNum={}", guestName, startDateTime, endDateTime, tableNum);
 
         List<Reservation> filteredReservations = reservationService.search(guestName, startDateTime, endDateTime, tableNum);
         return reservationMapper.reservationToReservationDto(filteredReservations);

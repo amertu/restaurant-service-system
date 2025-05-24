@@ -16,9 +16,16 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.plugin>3.10.1</maven.compiler.plugin>
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
-        <spring.boot.version>2.7.18</spring.boot.version>
+        <spring.boot.version>3.4.5</spring.boot.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <jjwt.version>0.11.1</jjwt.version>
+        <postgre.version>42.7.5</postgre.version>
+        <h2.version>2.3.232</h2.version>
+        <openapi.version>1.8.0</openapi.version>
+        <openpdf.version>2.0.3</openpdf.version>
+        <junit.version>4.13.2</junit.version>
+        <dotenv.version>5.2.2</dotenv.version>
+        <jjwt.version>0.12.6</jjwt.version>
+        <lombok.version>1.18.38</lombok.version>
     </properties>
 
     <dependencyManagement>
@@ -53,12 +60,12 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.5</version>
+            <version>${postgre.version}</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.3.232</version>
+            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -69,13 +76,13 @@
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
-            <version>1.5.5.Final</version>
+            <version>${mapstruct.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.8.0</version>
+            <version>${openapi.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -105,40 +112,38 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-<!--        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>itextpdf</artifactId>
-            <version>5.5.10</version>
-        </dependency>-->
         <dependency>
             <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
-            <version>2.0.3</version>
+            <version>${openpdf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+            <version>10.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>java-dotenv</artifactId>
-            <version>5.2.2</version>
+            <version>${dotenv.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.32</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
-
 
 
     </dependencies>

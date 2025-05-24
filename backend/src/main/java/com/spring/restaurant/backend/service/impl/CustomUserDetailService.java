@@ -22,7 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.xml.bind.ValidationException;
+import jakarta.xml.bind.ValidationException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Optional;

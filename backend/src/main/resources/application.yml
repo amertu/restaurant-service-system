@@ -28,9 +28,12 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
-
   profiles:
     active: generateData
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
 security:
   auth:
@@ -64,3 +67,5 @@ springdoc:
   swagger-ui:
     path: /swagger-ui
     enabled: true
+
+

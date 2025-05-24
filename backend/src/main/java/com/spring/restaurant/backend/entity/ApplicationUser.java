@@ -1,7 +1,7 @@
 package com.spring.restaurant.backend.entity;
 
-import javax.persistence.*;
-import javax.validation.constraints.Email;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import java.util.Objects;
 
 @Entity

@@ -18,8 +18,9 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
-import javax.xml.bind.ValidationException;
+import jakarta.validation.Valid;
+import jakarta.xml.bind.ValidationException;
+
 import java.lang.invoke.MethodHandles;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,8 +55,7 @@ public class UserEndpoint {
                 userRegisterDtos.add(userMapper.applicationUserToUserRegisterDto(user));
             }
             return userRegisterDtos;
-        }
-        catch (NotFoundException e){
+        } catch (NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
@@ -64,13 +64,13 @@ public class UserEndpoint {
     @PutMapping(value = "/changeUserBlockedValue/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Change the blocked flag of a user")
-    public int changeUserBlockedValue(@PathVariable Long id, @Valid @RequestBody UserRegisterDto blockedUser){
-        LOGGER.info("PUT /api/v1/users/changeUserBlockedValue/{}",id);
+    public int changeUserBlockedValue(@PathVariable Long id, @Valid @RequestBody UserRegisterDto blockedUser) {
+        LOGGER.info("PUT /api/v1/users/changeUserBlockedValue/{}", id);
         try {
             return userService.updateBlockedById(id, blockedUser.getBlocked());
-        } catch (NotFoundException e){
+        } catch (NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        } catch (ValidationException e){
+        } catch (ValidationException e) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
         }
     }
@@ -131,7 +131,7 @@ public class UserEndpoint {
     @PutMapping(value = "/{id}/passwordReset")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Reset password of a user")
-    public int resetUserPassword (@PathVariable("id") Long id, @Valid @RequestBody UserRegisterDto user) {
+    public int resetUserPassword(@PathVariable("id") Long id, @Valid @RequestBody UserRegisterDto user) {
         LOGGER.info("PUT /api/v1/users/{}/passwordReset", id);
         LOGGER.info(user.toString());
         try {

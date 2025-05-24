@@ -21,6 +21,6 @@ public interface FloorLayoutMapper {
      * @param floorLayoutDto the DTO which has to be converted.
      * @return the converted Entity.
      */
-    FloorLayout floorLayoutDtoToFloorLayoutEntity(FloorLayoutDto  floorLayoutDto);
+    FloorLayout floorLayoutDtoToFloorLayoutEntity(FloorLayoutDto floorLayoutDto);
 
 }
