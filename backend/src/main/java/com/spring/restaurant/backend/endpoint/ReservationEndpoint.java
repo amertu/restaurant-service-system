@@ -43,8 +43,6 @@ public class ReservationEndpoint {
         this.reservationMapper = reservationMapper;
     }
 
-
-    @Secured("ROLE_USER")
     @GetMapping({"", "/"})
     @Operation(summary = "Get list of reservations without details")
     @ResponseStatus(HttpStatus.OK)
@@ -53,8 +51,6 @@ public class ReservationEndpoint {
         return reservationMapper.reservationToReservationDto(reservationService.findAll());
     }
 
-
-    @Secured("ROLE_USER")
     @RequestMapping(
         params = {"startDateTime", "endDateTime"},
         method = GET
@@ -83,16 +79,14 @@ public class ReservationEndpoint {
     }
 
 
-    @Secured("ROLE_USER")
     @GetMapping(value = "/{id}")
     @Operation(summary = "et a reservation by ID")
-    public ReservationDto findOne(@PathVariable Long id) {
+    public ReservationDto findOne(@PathVariable("id") Long id) {
         LOGGER.info("GET " + BASE_URL + "/{}", id);
         return reservationMapper.reservationToReservationDto(reservationService.findOne(id));
     }
 
 
-    @Secured("ROLE_USER")
     @PutMapping
     @Operation(summary = "Update an existing reservation")
     public ReservationDto update(@Valid @RequestBody ReservationDto reservationDto) {
@@ -101,7 +95,6 @@ public class ReservationEndpoint {
         return reservationMapper.reservationToReservationDto(reservationService.updateReservation(reservation));
     }
 
-    @Secured("ROLE_USER")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Post a reservation")
@@ -116,7 +109,6 @@ public class ReservationEndpoint {
         return reservationMapper.reservationToReservationDto(createdReservation);
     }
 
-    @Secured("ROLE_USER")
     @DeleteMapping(value = "/{id}")
     @Operation(summary = "Delete a reservation by id")
     public void deleteReservationById(@PathVariable("id") Long id) {
@@ -124,7 +116,6 @@ public class ReservationEndpoint {
         reservationService.deleteReservationById(id);
     }
 
-    @Secured("ROLE_USER")
     @GetMapping(value = "/filter")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Filter reservations by params")

@@ -13,6 +13,9 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: ${POSTGRES_USER}                                    #
     password: ${POSTGRES_PASSWORD}
+  mvc:
+    path match:
+      matching-strategy: ant_path_matcher
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true

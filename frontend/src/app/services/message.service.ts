@@ -24,13 +24,13 @@ export class MessageService {
   /**
    * Loads all messages from the backend
    */
-  getMessage(): Observable<Message[]> {
+  getMessages(): Observable<Message[]> {
     return this.httpClient.get<Message[]>(this.messageBaseUri);
   }
 
   /**
-   * Loads specific message from the backend
-   * @param id of message to load
+   * Loads a specific message from the backend
+   * @param id of a message to load
    */
   getMessageById(id: number): Observable<Message> {
     return this.httpClient.get<Message>(`${this.messageBaseUri}/${id}`).pipe(
@@ -42,7 +42,7 @@ export class MessageService {
   }
 
   /**
-   * Persists message to the backend
+   * Persists a message to the backend
    * @param message to persist
    */
   createMessage(message: Message): Observable<Message> {

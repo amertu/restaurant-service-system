@@ -1,15 +1,15 @@
-.custom-switch {
+.form-switch {
   padding-left: 2.25rem;
   padding-bottom: 1rem;
 }
 
-.custom-control-label {
+.form-check-label {
   padding-top: 0.5rem;
   padding-left: 2rem;
   padding-bottom: 0.1rem;
 }
 
-.custom-switch .custom-control-label::before {
+.form-switch .form-check-label::before {
   left: -2.25rem;
   height: 2rem;
   width: 3.5rem;
@@ -17,7 +17,7 @@
   border-radius: 1rem;
 }
 
-.custom-switch .custom-control-label::after {
+.form-switch .form-check-label::after {
   top: calc(0.25rem + 2px);
   left: calc(-2.25rem + 2px);
   width: calc(2rem - 4px);
@@ -29,12 +29,12 @@
   transition: transform 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-transform 0.15s ease-in-out;
 }
 @media (prefers-reduced-motion: reduce) {
-  .custom-switch .custom-control-label::after {
+  .form-switch .form-check-label::after {
     transition: none;
   }
 }
 
-.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+.form-switch .form-check-input:checked ~ .form-check-label::after {
   background-color: #fff;
   -webkit-transform: translateX(1.5rem);
   transform: translateX(1.5rem);

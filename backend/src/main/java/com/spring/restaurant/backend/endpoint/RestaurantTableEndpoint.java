@@ -52,12 +52,11 @@ public class RestaurantTableEndpoint {
 
     @GetMapping(value = "/{id}")
     @Operation(summary = "Get a table by ID")
-    public RestaurantTableDto findOne(@PathVariable Long id) {
+    public RestaurantTableDto findOne(@PathVariable("id") Long id) {
         LOGGER.info("GET " + PATH + "/{}", id);
         return restaurantTableMapper.restaurantTableEntityToDto(restaurantTableService.findOne(id));
     }
 
-    @Secured("ROLE_ADMIN")
     @PostMapping
     @Operation(summary = "Add a new table")
     public RestaurantTableDto add(@Valid @RequestBody RestaurantTableDto tableDto) {
@@ -65,15 +64,13 @@ public class RestaurantTableEndpoint {
         return restaurantTableMapper.restaurantTableEntityToDto(restaurantTableService.add(restaurantTableMapper.restaurantTableDtoToEntity(tableDto)));
     }
 
-    @Secured("ROLE_ADMIN")
     @PostMapping(value = "/clone/{id}")
     @Operation(summary = "Create a cloned version of table identified by supplied id and set its tableNum to the next available tableNum")
-    public RestaurantTableDto clone(@PathVariable Long id) {
+    public RestaurantTableDto clone(@PathVariable("id") Long id) {
         LOGGER.info("POST " + PATH + "/clone/{}", id);
         return restaurantTableMapper.restaurantTableEntityToDto(restaurantTableService.clone(id));
     }
 
-    @Secured("ROLE_ADMIN")
     @PutMapping
     @Operation(summary = "Update an existing table")
     public RestaurantTableDto update(@Valid @RequestBody RestaurantTableDto tableDto) {
@@ -81,15 +78,13 @@ public class RestaurantTableEndpoint {
         return restaurantTableMapper.restaurantTableEntityToDto(restaurantTableService.update(restaurantTableMapper.restaurantTableDtoToEntity(tableDto)));
     }
 
-    @Secured("ROLE_ADMIN")
     @DeleteMapping(value = "/{id}")
     @Operation(summary = "Delete a table by id")
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable("id") Long id) {
         LOGGER.info("DELETE " + PATH + "/{}", id);
         restaurantTableService.delete(id);
     }
 
-    @Secured("ROLE_USER")
     @PatchMapping
     @Operation(summary = "update a tables active status")//TODO: change value maybe?
     public RestaurantTableDto setActive(@Valid @RequestBody RestaurantTableStatusDto partialUpdate) {
@@ -98,7 +93,6 @@ public class RestaurantTableEndpoint {
             restaurantTableService.setActive(restaurantTableMapper.singleFieldRestaurantTableDtoToEntity(partialUpdate)));
     }
 
-    @Secured("ROLE_ADMIN")
     @PatchMapping(value = "/coordinates")
     @Operation(summary = "Get all waiters")
     public RestaurantTableDto setCoordinates(@Valid @RequestBody RestaurantTableCoordinatesDto partialUpdate) {
@@ -107,7 +101,6 @@ public class RestaurantTableEndpoint {
             restaurantTableService.setCoordinates(restaurantTableMapper.restaurantTableCoordinatesDtoToEntity(partialUpdate)));
     }
 
-    @Secured("ROLE_USER")
     @RequestMapping(
         params = {"numberOfGuests", "idOfReservationToIgnore", "startDateTime", "endDateTime"},
         method = GET

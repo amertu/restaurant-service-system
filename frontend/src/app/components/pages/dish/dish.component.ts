@@ -2,29 +2,28 @@ import {Component, OnInit} from '@angular/core';
 import {AlertService} from '../../../services/alert.service';
 import {DishService} from '../../../services/dish.service';
 import {Dish} from '../../../dtos/dish';
+import {NgForOf} from '@angular/common';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {DishAddComponent} from './dish-add/dish-add.component';
 import {DishEditComponent} from './dish-edit/dish-edit.component';
 import {DishDeleteComponent} from './dish-delete/dish-delete.component';
-import {DishAddComponent} from './dish-add/dish-add.component';
-import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-dish-list',
   templateUrl: './dish.component.html',
   standalone: true,
   imports: [
-    DishEditComponent,
-    DishDeleteComponent,
-    DishAddComponent,
     NgForOf,
-    NgIf
+
   ],
   styleUrls: ['./dish.component.scss']
 })
 export class DishComponent implements OnInit {
   dishes: Dish[];
-  selectedDish: Dish;
 
-  constructor(private dishService: DishService, private alertService: AlertService) {
+  constructor(private dishService: DishService,
+              private alertService: AlertService,
+              private modalService: NgbModal) {
   }
 
   ngOnInit(): void {
@@ -48,7 +47,21 @@ export class DishComponent implements OnInit {
     return '' + Math.floor(price / 100) + ',' + (price % 100 + ' €').padStart(4, '0');
   }
 
-  selectDish(dish: Dish) {
-    this.selectedDish = dish;
+  onClickAddDish() {
+    const modalRef = this.modalService.open(DishAddComponent);
+    modalRef.result.then(() => this.loadAllDishes());
+  }
+
+
+  onClickEditDish(dish ) {
+    const modalRef = this.modalService.open(DishEditComponent);
+    modalRef.componentInstance.dish = dish;
+    modalRef.result.then(() => this.loadAllDishes());
+  }
+
+  onClickDeleteDish(dish) {
+    const modalRef = this.modalService.open(DishDeleteComponent);
+    modalRef.componentInstance.dish = dish;
+    modalRef.result.then(() => this.loadAllDishes());
   }
 }

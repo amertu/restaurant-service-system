@@ -10,7 +10,7 @@
   <div class="card">
     <div class="card-header bg-light">
       <h5>Reservations:</h5>
-      <button class="btn fas fa-plus" data-toggle="modal" data-target=".addModal"></button>
+      <button class="btn fas fa-plus" data-bs-toggle="modal" data-bs-target=".addModal"></button>
     </div>
     <div class="card-body table-responsive">
       <table class="table table-hover table-sm table-bordered">
@@ -36,9 +36,9 @@
             <span *ngIf="isLast">{{table.tableNum}}</span>
             </span>
           </td>
-          <!--<td><button class="btn btn-block fas fa-info-circle" (click)="selectReservation(reservation)" data-toggle="modal" data-target=".detailsModal"></button></td> -->
-          <td><button class="btn btn-block fas fa-edit" (click)="selectReservation(reservation)" data-toggle="modal" data-target=".editModal"></button></td>
-          <td><button class="btn fas fa-trash" (click)="selectReservation(reservation)" data-toggle="modal" data-target=".deleteModal"></button></td>
+          <!--<td><button class="btn btn-block fas fa-info-circle" (click)="selectReservation(reservation)" data-bs-toggle="modal" data-bs-target=".detailsModal"></button></td> -->
+          <td><button class="btn btn-block fas fa-edit" (click)="selectReservation(reservation)" data-bs-toggle="modal" data-bs-target=".editModal"></button></td>
+          <td><button class="btn fas fa-trash" (click)="selectReservation(reservation)" data-bs-toggle="modal" data-bs-target=".deleteModal"></button></td>
         </tr>
         </tbody>
       </table>

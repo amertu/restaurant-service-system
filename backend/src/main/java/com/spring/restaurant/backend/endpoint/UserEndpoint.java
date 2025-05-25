@@ -43,7 +43,6 @@ public class UserEndpoint {
     }
 
     // TODO: this should be renamed, since 'waiter' doesn't fit its purpose (--> getNonAdmins)
-    @Secured("ROLE_ADMIN")
     @GetMapping(value = "/waiters")
     @Operation(summary = "Get all waiters")
     public List<UserRegisterDto> getAllWaiters() {
@@ -60,11 +59,10 @@ public class UserEndpoint {
         }
     }
 
-    @Secured("ROLE_ADMIN")
     @PutMapping(value = "/changeUserBlockedValue/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Change the blocked flag of a user")
-    public int changeUserBlockedValue(@PathVariable Long id, @Valid @RequestBody UserRegisterDto blockedUser) {
+    public int changeUserBlockedValue(@PathVariable("id") Long id, @Valid @RequestBody UserRegisterDto blockedUser) {
         LOGGER.info("PUT /api/v1/users/changeUserBlockedValue/{}", id);
         try {
             return userService.updateBlockedById(id, blockedUser.getBlocked());
@@ -75,7 +73,6 @@ public class UserEndpoint {
         }
     }
 
-    @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     @Operation(summary = "Create a new user")
@@ -90,7 +87,6 @@ public class UserEndpoint {
 
     }
 
-    @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     @Operation(summary = "Get all users")
@@ -108,7 +104,6 @@ public class UserEndpoint {
         }
     }
 
-    @Secured("ROLE_ADMIN")
     @DeleteMapping(value = "/{email}")
     @Operation(summary = "Delete user by E-mail")
     public UserRegisterDto deleteUserAsAdminByEmail(@Valid @PathVariable("email") String userToDelete,
@@ -127,7 +122,6 @@ public class UserEndpoint {
         }
     }
 
-    @Secured("ROLE_ADMIN")
     @PutMapping(value = "/{id}/passwordReset")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Reset password of a user")
@@ -143,7 +137,6 @@ public class UserEndpoint {
         }
     }
 
-    @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.OK)
     @PutMapping
     @Operation(summary = "Update user by Id")
@@ -156,7 +149,6 @@ public class UserEndpoint {
         }
     }
 
-    @Secured("ROLE_ADMIN")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/{userId}")
     @Operation(summary = "Get user by Id")

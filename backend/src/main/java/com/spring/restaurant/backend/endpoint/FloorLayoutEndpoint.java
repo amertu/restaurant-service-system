@@ -35,7 +35,7 @@ public class FloorLayoutEndpoint {
 
     @GetMapping(value = "/{id}")
     @Operation(summary = "Get layout with ID")
-    public FloorLayoutDto findOne(@PathVariable Long id) {
+    public FloorLayoutDto findOne(@PathVariable("id") Long id) {
         LOGGER.info("GET " + PATH + "/{}", id);
         return floorLayoutMapper.floorLayoutEntityToFloorLayoutDto(floorLayoutService.findLayout(id));
     }

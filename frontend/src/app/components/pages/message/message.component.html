@@ -1,14 +1,14 @@
 <div class="mt-4 container">
 
   <div class="row p-2 mb-4">
-    <button *ngIf="authService.isAdmin()" type="button" class="btn btn-secondary btn-sm mr-4" data-toggle="modal" data-target=".create-message-modal">Add announcement</button>
+    <button *ngIf="authService.isAdmin()" type="button" class="btn btn-secondary btn-sm mr-4" data-bs-toggle="modal" data-bs-target=".create-message-modal">Add announcement</button>
 
     <div class="modal fade create-message-modal" tabindex="-1" role="dialog" aria-labelledby="Create message modal" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Create announcement</h5>
-            <button type="button" class="close btn" data-dismiss="modal" aria-label="Close">
+            <button type="button" class="close btn" data-bs-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
@@ -50,7 +50,7 @@
             </form>
           </div>
           <div class="modal-footer bg-dark text-white">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button type="button" (click)="addMessage()" class="btn btn-success float-right">Add announcement</button>
           </div>
         </div>
@@ -69,8 +69,8 @@
           <h5 class="card-title">{{message.title}}</h5>
           <h6 class="card-subtitle mb-2 text-muted">{{message.publishedAt | date}}</h6>
           <p class="card-text">{{message.summary}}</p>
-          <button (click)="getMessageDetails(message.id)" type="button" class="btn btn-primary" data-toggle="modal"
-                  [attr.data-target]="'.message-modal-'+message.id">
+          <button (click)="getMessageDetails(message.id)" type="button" class="btn btn-primary" data-bs-toggle="modal"
+                  [attr.data-bs-target]="'.message-modal-'+message.id">
             Details
           </button>
         </div>
@@ -82,7 +82,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">{{message.title}}</h5>
-                <button type="button" class="close btn" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close btn" data-bs-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -91,7 +91,7 @@
                 <p class="mt-2"> {{message.text}} </p>
               </div>
               <div class="modal-footer bg-dark text-white">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               </div>
             </div>
           </div>

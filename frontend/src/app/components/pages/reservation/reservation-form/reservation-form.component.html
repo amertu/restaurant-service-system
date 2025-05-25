@@ -10,7 +10,7 @@
       <form (keyup.enter)="onSubmit()" class="form" [formGroup]="reservationForm">
           <div *ngIf="type === 'Add'" class="form-group">
           <div>
-            <button type="button" class="btn btn-warning" (click)="fillFormForWalkInCustomer()"> 
+            <button type="button" class="btn btn-warning" (click)="fillFormForWalkInCustomer()">
               <i class="fas fa-walking"></i>
               Walk-in customer</button>
           </div>
@@ -83,7 +83,7 @@
               </div>
 
         </div>
-        <!-- // It was decided to currently use an "End Time"-Spinner instead of the Duration selector. 
+        <!-- // It was decided to currently use an "End Time"-Spinner instead of the Duration selector.
 
         <div class="form-group">
           <label>Duration in hours*</label>
@@ -121,9 +121,9 @@
             <tbody>
             <tr *ngFor="let table of tables; let i = index" [ngStyle]="{ backgroundColor: tableColors[i] }">
               <td>
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" class="custom-control-input" (click)="setCheck(i)" [checked]="checkedTables[i]" id="{{'table' + type + i}}">
-                  <label class="custom-control-label" for="{{'table' + type + i}}"></label>
+                <div class="form-check ">
+                  <input type="radio" class="form-check-input" (click)="setCheck(i)" [checked]="checkedTables[i]" id="{{'table' + type + i}}">
+                  <label class="form-check-label" for="{{'table' + type + i}}"></label>
                 </div>
               </td>
               <td>{{ table.tableNum }}</td>

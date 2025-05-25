@@ -24,8 +24,11 @@ import {NgForOf, NgIf} from '@angular/common';
 export class UserComponent implements OnInit {
   users: ApplicationUser[];
 
-  constructor(private router: Router, private applicationUserService: ApplicationUserService,
-              public authService: AuthService, private alertService: AlertService, private modalService: NgbModal) {
+  constructor(private router: Router,
+              private applicationUserService: ApplicationUserService,
+              public authService: AuthService,
+              private alertService: AlertService,
+              private modalService: NgbModal) {
   }
 
   ngOnInit(): void {
@@ -76,7 +79,7 @@ export class UserComponent implements OnInit {
   onClickResetPassword(user) {
     const modalRef = this.modalService.open(PasswordResetComponent);
     modalRef.componentInstance.user = user;
-    //result is a promise which gets resolved on close action and rejected on dismiss
+    //the result is a promise that gets resolved on close action and rejected on dismiss
     //modal is closed if the user confirms the action, otherwise it is dismissed
     modalRef.result.then(() => this.loadUsers());
   }

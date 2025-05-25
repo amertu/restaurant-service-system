@@ -4,6 +4,7 @@ import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} fr
 import {DishService} from '../../../../services/dish.service';
 import {Dish} from '../../../../dtos/dish';
 import {NgIf} from '@angular/common';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-dish-add',
@@ -11,7 +12,7 @@ import {NgIf} from '@angular/common';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    NgIf
+    NgIf,
   ],
   styleUrls: ['./dish-add.component.scss']
 })
@@ -19,7 +20,10 @@ export class DishAddComponent implements OnInit {
   submitted: boolean = false;
   protected dishForm: FormGroup;
 
-  constructor(private formBuilder: FormBuilder, private dishService: DishService, private alertService: AlertService) {
+  constructor(private formBuilder: FormBuilder,
+              private dishService: DishService,
+              private alertService: AlertService,
+              public activeModal: NgbActiveModal) {
   }
 
 
@@ -54,7 +58,10 @@ export class DishAddComponent implements OnInit {
 
   save(dish: Dish) {
     this.dishService.createDish(dish).subscribe({
-      next: () => window.location.reload(),
+      next: () => {
+        window.location.reload();
+        this.activeModal.close();
+      },
       error: (error) => this.alertService.error(error)
     });
   }

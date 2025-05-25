@@ -122,7 +122,7 @@ export class MessageComponent implements OnInit {
    * Loads the specified page of message from the backend
    */
   private loadMessage() {
-    this.messageService.getMessage().subscribe({
+    this.messageService.getMessages().subscribe({
         next: (message: Message[]) => {
           this.message = message;
         },

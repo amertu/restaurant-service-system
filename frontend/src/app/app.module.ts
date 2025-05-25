@@ -5,7 +5,6 @@ import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@ang
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {RouterModule} from '@angular/router';
 import {AuthInterceptor} from './interceptors/auth-interceptor';
-import {AppComponent} from './app.component';
 
 @NgModule({
   declarations: [],
@@ -14,7 +13,7 @@ import {AppComponent} from './app.component';
     ReactiveFormsModule,
     NgbModule,
     FormsModule,
-    RouterModule
+    RouterModule,
   ],
   providers: [
     {
