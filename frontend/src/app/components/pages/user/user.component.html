@@ -26,9 +26,9 @@
             <button *ngIf="!user.blocked" class="btn fas fa-unlock" (click)="onClickBlockButton(user, true)"></button>
             <button *ngIf="user.blocked" class="btn fas fa-lock inactive" (click)="onClickBlockButton(user, false)"></button>
           </td>
-          <td><button class="btn fas fa-key" (click)="onClickResetPassword(user)"></button></td>
-          <td><button class="btn fas fa-edit" (click)="onClickEditUser(user)"></button></td>
-          <td><button class="btn fas fa-trash" (click)="onClickDeleteUser(user)"></button></td>
+          <td><button class="{{user.blocked ? 'btn fas fa-key inactive' : 'btn fas fa-key'}}" (click)="onClickResetPassword(user)" [disabled]="user.blocked"></button></td>
+          <td><button class="{{user.blocked ? 'btn fas fa-edit inactive' : 'btn fas fa-edit'}}" (click)="onClickEditUser(user)" [disabled]="user.blocked"></button></td>
+          <td><button class="{{user.blocked ? 'btn fas fa-trash inactive' : 'btn fas fa-trash'}}" (click)="onClickDeleteUser(user)" [disabled]="user.blocked"></button></td>
         </tr>
         </tbody>
       </table>

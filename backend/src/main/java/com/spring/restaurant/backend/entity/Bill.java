@@ -16,7 +16,6 @@ public class Bill {
     @Column
     private Long invoiceId;
 
-    @Lob
     @Column(name = "pdf", nullable = false, columnDefinition = "bytea")
     private byte[] pdf;
 

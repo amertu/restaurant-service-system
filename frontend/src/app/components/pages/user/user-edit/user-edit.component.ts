@@ -17,7 +17,7 @@ import {NgIf} from '@angular/common';
   styleUrls: ['./user-edit.component.scss']
 })
 export class UserEditComponent implements OnInit, OnChanges {
-  @Input() user: ApplicationUser;
+  @Input() user: any;
   submitted: boolean = false;
   editForm: FormGroup;
 
@@ -46,8 +46,10 @@ export class UserEditComponent implements OnInit, OnChanges {
       firstName: [this.user.firstName, [Validators.required]],
       lastName: [this.user.lastName, [Validators.required]],
       email: [this.user.email, [Validators.required, Validators.email]],
+      ssnr: [this.user.ssnr],
       admin: [this.user.admin]
     });
+
   }
 
   onSubmitUpdate(): void {

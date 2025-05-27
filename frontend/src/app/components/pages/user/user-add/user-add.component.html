@@ -44,10 +44,9 @@
       </div>
     </div>
     <div class="form-group">
-      <div class="form-check">
-        <input type="radio" class="form-check-input" id="admin-add" value="true" name="admin"
-          formControlName="admin">
-        <label class="form-check-label" for="admin-add">Admin</label>
+      <div class="form-check d-flex align-items-center">
+        <input type="checkbox" class="form-check-input me-2" id="admin-checkbox" value="false" formControlName="admin">
+        <label class="form-check-label mb-0" for="admin-checkbox">Admin</label>
       </div>
     </div>
     <div class="form-group">
@@ -92,7 +91,7 @@
     </div>
   </form>
   <div class="modal-footer bg-dark text-white">
-    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('Cancel click')" #closeBtn>Cancel</button>
+    <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('User cancelled')">Cancel</button>
     <button type="button" class="btn btn-success float-right" (click)="onSubmitAdd()">Add</button>
   </div>
 </div>

@@ -10,23 +10,25 @@ import com.spring.restaurant.backend.repository.BillRepository;
 import com.spring.restaurant.backend.repository.PurchaseRepository;
 import com.spring.restaurant.backend.repository.UserRepository;
 import com.spring.restaurant.backend.service.BillService;
+import jakarta.xml.bind.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.xml.bind.ValidationException;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Service
@@ -36,6 +38,10 @@ public class SimpleBillService implements BillService {
     private final UserRepository userRepository;
     private final PurchaseRepository purchaseRepository;
     private final BillRepository billRepository;
+    private static final Path TEMP_DIR = Paths.get(
+        Objects.requireNonNull(System.getProperty("java.io.tmpdir"),
+            "System property java.io.tmpdir not set"));
+    private final int MAX_PDF_SIZE = 10 * 1024 * 1024; // 10MB limit
 
     @Autowired
     public SimpleBillService(UserRepository userRepository, PurchaseRepository purchaseRepository, BillRepository billRepository) {
@@ -46,20 +52,18 @@ public class SimpleBillService implements BillService {
 
 
     @Override
-    public List<Purchase> buyDishes(String email, Bill bill) throws ValidationException {
-        LOGGER.info("Buy dishes by user with email: {}", email);
-        LOGGER.info("Bill with dishes: " + bill);
-        ApplicationUser user = userRepository.getUserByEmail(email);
+    public List<Purchase> buyDishes(Bill bill) throws ValidationException {
+        LOGGER.info("Bill with dishes: {}", bill);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        LocalDateTime paidAt = LocalDateTime.parse(LocalDateTime.now().toString().replace('T', ' ').substring(0, 16), formatter);
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+//        LocalDateTime paidAt = LocalDateTime.parse(bill.getPaidAt(), formatter);
         List<Dish> dishesList = bill.getDishes();
         if (!dishesList.isEmpty()) {
             for (Dish dish : dishesList) {
                 Purchase temp = new Purchase();
                 temp.setDish(dish);
                 temp.setPaid(true);
-                temp.setPaidAt(paidAt);
+                temp.setPaidAt(bill.getPaidAt());
                 temp.setInvoiceId(bill.getInvoiceId());
                 purchaseRepository.save(temp);
             }
@@ -72,21 +76,16 @@ public class SimpleBillService implements BillService {
         LOGGER.info("reservationStartedAt: " + bill.getReservationStartedAt());
         LOGGER.info("servedTables: " + bill.getServedTables());
         // TODO maybe pass just purchases and bill?
-        createPdfOfBill(purchases, bill.getInvoiceId(), paidAt, bill.getReservationStartedAt(), bill.getServedTables(), user);
+        createPdfOfBill(purchases, bill);
         return purchases;
     }
 
     @Override
-    public void createPdfOfBill(List<Purchase> purchases, Long invoiceId, LocalDateTime paidAt,
-                                String reservationStartedAt, String servedTables, ApplicationUser user) {
-
-        LOGGER.info("Creating invoice PDF");
-        final String pdfName = "invoice.pdf";
-        final String date = paidAt.toLocalDate().toString();
-
-        try (FileOutputStream fos = new FileOutputStream(pdfName)) {
+    public void createPdfOfBill(List<Purchase> purchases, Bill bill) throws ValidationException {
+        ApplicationUser user = currentUser();
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             Document document = new Document();
-            PdfWriter writer = PdfWriter.getInstance(document, fos);
+            PdfWriter writer = PdfWriter.getInstance(document, baos);
             document.open();
 
             // Fonts
@@ -97,7 +96,7 @@ public class SimpleBillService implements BillService {
             Font footerFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
 
             // Header table
-            PdfPTable headerTable = buildHeaderTable(date, reservationStartedAt, servedTables, invoiceId, addressFont);
+            PdfPTable headerTable = buildHeaderTable(bill, addressFont);
 
             // Main invoice table
             Map<Dish, Integer> itemCounts = countPurchases(purchases);
@@ -105,7 +104,6 @@ public class SimpleBillService implements BillService {
 
             // Tax table
             PdfPTable taxTable = buildTaxTable(itemCounts, tableHeaderFont, taxTableContentFont);
-            double total = computeTotal(itemCounts);
 
             // Footer
             drawFooter(document, writer, footerFont, user);
@@ -118,50 +116,97 @@ public class SimpleBillService implements BillService {
             document.add(space);
             document.add(taxTable);
             document.close();
+            byte[] pdfBytes = baos.toByteArray();
+            if (pdfBytes.length > MAX_PDF_SIZE) {
+                throw new ValidationException("Generated PDF exceeds maximum size of 10MB");
+            }
+            LOGGER.info("PDF size: {} bytes", pdfBytes.length);
+            LOGGER.info("PDF type: {}", baos.toByteArray() instanceof byte[] ? "byte[]" : "unknown");
 
-            saveBill(pdfName, invoiceId, paidAt, total, reservationStartedAt, servedTables);
+            bill.setPdf(pdfBytes);
+            bill.setTotalCost(computeTotal(itemCounts));
+            billRepository.save(bill);
 
         } catch (IOException | DocumentException e) {
-            LOGGER.error("Error creating invoice PDF: {}", e.getMessage(), e);
+            throw new ValidationException("Failed to create PDF: " + e.getMessage());
         }
+
     }
 
-    private PdfPTable buildHeaderTable(String date, String reservationStartedAt, String servedTables,
-                                       Long invoiceId, Font addressFont) throws IOException, DocumentException {
+    private ApplicationUser currentUser() throws ValidationException {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String usermail = principal.toString();
+        if (principal instanceof UserDetails) {
+            usermail = ((UserDetails) principal).getUsername();
+        }
+        ApplicationUser user = userRepository.getUserByEmail(usermail);
+        if (user == null) {
+            throw new ValidationException("User not found for email: " + usermail);
+        }
+        LOGGER.info("Current user: {}", user);
+        return user;
+    }
+
+    private PdfPTable buildHeaderTable(Bill bill, Font addressFont) throws IOException, DocumentException {
         Image logo = Image.getInstance("src/main/resources/image/leaf.png");
         logo.scaleAbsolute(15, 15);
-        Paragraph logoParagraph = new Paragraph();
-        logoParagraph.add(new Chunk(logo, 0, 0));
-        logoParagraph.add(new Phrase("Spring Kitchen", FontFactory.getFont(FontFactory.COURIER, 16)));
 
-        PdfPCell logoCell = new PdfPCell();
-        logoCell.setBorder(Rectangle.NO_BORDER);
-        logoCell.addElement(logoParagraph);
+        // --- Left: Logo + Restaurant Name ---
+        Chunk logoChunk = new Chunk(logo, 0, -3); // slight Y offset to align with text
+        Chunk nameChunk = new Chunk(" Spring Kitchen", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14));
 
-        PdfPTable table = new PdfPTable(2);
-        table.setWidthPercentage(100);
-        table.setWidths(new float[]{3.3f, 1});
-        table.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+        Phrase leftHeaderPhrase = new Phrase();
+        leftHeaderPhrase.add(logoChunk);
+        leftHeaderPhrase.add(nameChunk);
 
-        String[] lines = new String[]{
+        PdfPCell leftHeaderCell = new PdfPCell(leftHeaderPhrase);
+        leftHeaderCell.setBorder(Rectangle.NO_BORDER);
+        leftHeaderCell.setVerticalAlignment(Element.ALIGN_TOP);
+        leftHeaderCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+
+        // Build address lines
+        String[] lines = getStrings(bill);
+        PdfPTable addressTable = new PdfPTable(1);
+        addressTable.setWidthPercentage(100);
+        for (String line : lines) {
+            if (line != null) {
+                PdfPCell lineCell = new PdfPCell(new Phrase(line, addressFont));
+                lineCell.setBorder(Rectangle.NO_BORDER);
+                addressTable.addCell(lineCell);
+            }
+        }
+
+        // Put the addressTable into a single cell on the right
+        PdfPCell addressCell = new PdfPCell(addressTable);
+        addressCell.setBorder(Rectangle.NO_BORDER);
+        addressCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        addressCell.setVerticalAlignment(Element.ALIGN_TOP); // ✅ top alignment
+
+        // Create the outer header table (2 columns)
+        PdfPTable headerTable = new PdfPTable(2);
+        headerTable.setWidthPercentage(100);
+        headerTable.setWidths(new float[]{3.3f, 1});
+
+        headerTable.addCell(leftHeaderCell);
+        headerTable.addCell(addressCell);
+
+        return headerTable;
+    }
+
+    private String[] getStrings(Bill bill) {
+        LocalDateTime paid = bill.getPaidAt();
+        String reservationStartedAt = bill.getReservationStartedAt();
+        String servedTables = bill.getServedTables();
+        Long invoiceId = bill.getInvoiceId();
+
+        return new String[]{
             "Spring Kitchen GmbH", "Frühlingsstraße 76", "www.springkitchen.at",
             "springkitchen@mail.com", "Tel/Fax +43(0)1/1234567", "VATIN: ATU87654321",
-            "Date: " + date,
+            "Date: " + paid,
             reservationStartedAt != null ? "Reservation started at: " + reservationStartedAt : null,
             servedTables != null && !servedTables.isBlank() ? "Served tables: " + servedTables : null,
             "Invoice number: " + invoiceId
         };
-
-        for (String line : lines) {
-            if (line != null) {
-                table.addCell(" ");
-                table.addCell(new Phrase(line, addressFont));
-            }
-        }
-
-        table.addCell(logoCell);
-        table.addCell(" ");
-        return table;
     }
 
     private Map<Dish, Integer> countPurchases(List<Purchase> purchases) {
@@ -204,12 +249,12 @@ public class SimpleBillService implements BillService {
             else drinkPrice += price;
         }
 
-        double foodGross = round(foodPrice / 100, 2);
-        double drinkGross = round(drinkPrice / 100, 2);
-        double foodTax = round(foodGross * 10 / 110, 2);
-        double drinkTax = round(drinkGross * 20 / 120, 2);
-        double foodNet = round(foodGross - foodTax, 2);
-        double drinkNet = round(drinkGross - drinkTax, 2);
+        double foodGross = round(foodPrice / 100);
+        double drinkGross = round(drinkPrice / 100);
+        double foodTax = round(foodGross * 10 / 110);
+        double drinkTax = round(drinkGross * 20 / 120);
+        double foodNet = round(foodGross - foodTax);
+        double drinkNet = round(drinkGross - drinkTax);
 
         PdfPTable table = new PdfPTable(4);
         table.setWidthPercentage(52);
@@ -233,7 +278,7 @@ public class SimpleBillService implements BillService {
         totalText.setBorder(Rectangle.TOP);
         table.addCell(totalText);
 
-        PdfPCell totalCell = new PdfPCell(new Phrase(String.format("%.2f EUR", round(foodGross + drinkGross, 2)), headerFont));
+        PdfPCell totalCell = new PdfPCell(new Phrase(String.format("%.2f EUR", round(foodGross + drinkGross)), headerFont));
         totalCell.setColspan(1);
         totalCell.setHorizontalAlignment(Element.ALIGN_MIDDLE);
         totalCell.setBorder(Rectangle.TOP);
@@ -264,32 +309,9 @@ public class SimpleBillService implements BillService {
         footerTable.writeSelectedRows(0, -1, 40, document.bottomMargin() + 5, canvas);
     }
 
-    private double round(double value, int places) {
-        double scale = Math.pow(10, places);
+    private double round(double value) {
+        double scale = Math.pow(10, 2);
         return Math.round(value * scale) / scale;
-    }
-
-
-    @Override
-    @Transactional
-    public void saveBill(String filename,
-                         Long invoiceId,
-                         LocalDateTime paidAt,
-                         double price,
-                         String reservationStartedAt,
-                         String servedTables) throws IOException {
-
-        byte[] pdfBytes = Files.readAllBytes(Paths.get(filename));
-
-        Bill bill = new Bill(invoiceId, pdfBytes, paidAt, price);
-        bill.setReservationStartedAt(reservationStartedAt);
-        bill.setServedTables(servedTables);
-
-        if (billRepository.findByInvoiceId(invoiceId) == null) {
-            billRepository.save(bill);
-        }
-
-        Files.deleteIfExists(Paths.get(filename));
     }
 
 

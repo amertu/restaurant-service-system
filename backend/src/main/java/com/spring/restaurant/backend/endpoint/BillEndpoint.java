@@ -8,18 +8,15 @@ import com.spring.restaurant.backend.endpoint.mapper.PurchaseMapper;
 import com.spring.restaurant.backend.service.BillService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.xml.bind.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import jakarta.xml.bind.ValidationException;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
@@ -51,16 +48,9 @@ public class BillEndpoint {
     @Operation(summary = "Buy Dishes with invoiceNumber")
     public List<PurchaseDto> buyDishes(@RequestBody BillDto billDto, @PathVariable("invoiceNumber") String invoiceId) {
         LOGGER.info("PUT /api/v1/bills/{}", invoiceId);
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else {
-            username = principal.toString();
-        }
 
         try {
-            return purchaseMapper.purchasesToPurchasesDto(billService.buyDishes(username, billMapper.billDtoToBill(billDto)));
+            return purchaseMapper.purchasesToPurchasesDto(billService.buyDishes(billMapper.billDtoToBill(billDto)));
         } catch (ValidationException e) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         }

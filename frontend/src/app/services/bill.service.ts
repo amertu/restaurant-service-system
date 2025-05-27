@@ -18,8 +18,6 @@ export class BillService {
 
   /**
    * A method to buy dishes
-   * @param dishes to be bought
-   * @param invoiceId id of the invoice
    */
   buyDishes(bill: Bill): Observable<Bill> {
     return this.httpClient.post<Bill>(this.billsBaseUri + '/' + bill.invoiceId, bill);

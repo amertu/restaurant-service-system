@@ -4,7 +4,7 @@ import {ApplicationUser} from '../../../dtos/application-user';
 import {Router} from '@angular/router';
 import {AuthService} from '../../../services/auth.service';
 import {AlertService} from '../../../services/alert.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {UserAddComponent} from './user-add/user-add.component';
 import {UserEditComponent} from './user-edit/user-edit.component';
 import {UserDeleteComponent} from './user-delete/user-delete.component';
@@ -40,14 +40,14 @@ export class UserComponent implements OnInit {
   }
 
   loadUsers(): void {
-    this.applicationUserService.getAllUsers().subscribe(
-      (users: ApplicationUser[]) => {
+    this.applicationUserService.getAllUsers().subscribe({
+      next: (users: ApplicationUser[]) => {
         this.users = users;
       },
-      error => {
+      error: (error) => {
         this.alertService.error(error);
       }
-    );
+    });
   }
 
   /**

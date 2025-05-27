@@ -27,8 +27,7 @@ export class BillingAddComponent implements OnInit {
   reservedTablesAsString: string;
 
   dishes: Dish[] = [];
-  private selectedDishes: number[] = [];
-  private selectedDishesObjects: Dish[] = [];
+  selectedDishCounts: { [dishId: number]: number } = {};
   protected selectedNumber: number[] = [];
 
   error: boolean = false;
@@ -73,64 +72,35 @@ export class BillingAddComponent implements OnInit {
     });
   }
 
-  /**
-   * select a dish
-   * @param selectedDish the selected
-   */
-  selectDishes(selectedDish: Dish) {
-    this.selectedDishes.push(selectedDish.id);
-    this.selectedDishesObjects.push(selectedDish);
-    this.selectedNumber[this.dishes.indexOf(selectedDish)] += 1;
-  }
-
-  /**
-   * unselect a dish
-   * @param unselectedDish the unselected
-   */
-  unselectDishes(unselectedDish: Dish) {
-    const index = this.selectedDishes.indexOf(unselectedDish.id);
-    if (index > -1) {
-      this.selectedDishes.splice(index, 1);
-      this.selectedDishesObjects.splice(index, 1);
-      this.selectedNumber[this.dishes.indexOf(unselectedDish)] -= 1;
-    }
-  }
-
-  formatPrice(price: number) {
-    return '' + Math.floor(price / 100) + ',' + (price % 100 + ' €').padStart(4, '0');
+  formatPrice(price: number): string {
+    const euros = Math.floor(price / 100);
+    const cents = (price % 100).toString().padStart(2, '0');
+    return `${euros},${cents} €`;
   }
 
   /**
    * complete checkout all dishes
    */
   checkout() {
-    const dateTime = new Date();
-    const invoiceId: string = this.timeUtilService.getDateTimeStringForInvoiceId(dateTime);
-    console.log(invoiceId);
-    if (this.selectedDishesObjects.length !== 0) {
-      this.buyDishes(invoiceId);
+    const selectedDishesObjects = this.dishes.filter(d => this.selectedDishCounts[d.id]);
+    if (selectedDishesObjects.length !== 0) {
+      this.buyDishes(selectedDishesObjects);
     }
   }
 
-  /**
-   * buy dishes
-   * @param invoiceId of the bought dishes
-   */
-  buyDishes(invoiceId: String) {
-    const bill: Bill = new Bill(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, null);
-    bill.invoiceId = Number(invoiceId);
-    bill.dishes = this.selectedDishesObjects;
-
+  buyDishes(dishes: Dish[]) {
+    const dateTime = new Date();
+    const invoiceId: string = this.timeUtilService.getDateTimeStringForInvoiceId(dateTime);
+    console.log(invoiceId);
+    let bill: Bill = new Bill(undefined, Number(invoiceId), undefined, undefined, dateTime, undefined, dishes, undefined, null);
     if (this.reservation) {
       bill.reservationStartedAt = formatDate(Date.parse(this.reservation.startDateTime), 'medium', 'en-US', '+0200');
       bill.servedTables = this.reservedTablesAsString;
     }
-
     this.billService.buyDishes(bill).subscribe({
       next: () => {
         this.errorMessage = 'Checkout completed successfully';
         this.errorSuccessful = true;
-        this.selectedDishesObjects = [];
         this.loadAllDishes();
         this.activeModal.close();
       },
@@ -140,18 +110,40 @@ export class BillingAddComponent implements OnInit {
     });
   }
 
-  /**
-   * error handling
-   * @param error the error message
-   */
-  private defaultServiceErrorHandling(error: any) {
+
+  private defaultServiceErrorHandling(error: any): void {
     this.error = true;
     if (error.status === 0) {
-      this.errorMessage = 'The backend seems not to be reachable';
-    } else if (error.error.message === 'No message available' || error.error.message === '' || error.error.message === null) {
-      this.errorMessage = error.error.error;
+      this.errorMessage = 'Backend not reachable';
+    } else if (!error.error?.message) {
+      this.errorMessage = error.error?.error || 'Unknown error occurred';
     } else {
       this.errorMessage = error.error.message;
     }
   }
+
+
+   selectDish(dish: Dish) {
+    const index = this.dishes.findIndex(d => d.id === dish.id);
+    this.selectedNumber[index] += 1;
+
+    if (!this.selectedDishCounts[dish.id]) {
+      this.selectedDishCounts[dish.id] = 1;
+    } else {
+      this.selectedDishCounts[dish.id]++;
+    }
+  }
+
+   unselectDish(dish: Dish) {
+    const index = this.dishes.findIndex(d => d.id === dish.id);
+    if (this.selectedNumber[index] > 0) {
+      this.selectedNumber[index] -= 1;
+      this.selectedDishCounts[dish.id]--;
+
+      if (this.selectedDishCounts[dish.id] <= 0) {
+        delete this.selectedDishCounts[dish.id];
+      }
+    }
+  }
+
 }

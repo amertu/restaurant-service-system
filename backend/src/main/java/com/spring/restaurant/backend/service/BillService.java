@@ -1,42 +1,27 @@
 package com.spring.restaurant.backend.service;
 
-import com.spring.restaurant.backend.entity.ApplicationUser;
 import com.spring.restaurant.backend.entity.Bill;
 import com.spring.restaurant.backend.entity.Purchase;
-
 import jakarta.xml.bind.ValidationException;
-import java.io.IOException;
-import java.time.LocalDateTime;
+
 import java.util.List;
 
 public interface BillService {
 
     /**
      * Buy dishes by a user
-     * @param email email of the user
-        // TODO
+
      * @return a list of paid dishes
-     * @throws ValidationException
      */
-    List<Purchase> buyDishes(String email, Bill bill) throws ValidationException;
+    List<Purchase> buyDishes(Bill bill) throws ValidationException;
 
     /**
-     * Create a pdf bill
-     * @param purchases of a bill
-     * @param invoiceId number of the invoice
-     * @param paidAt LocalDateTime, at which a bill is paid
-     * @param user user who creates a bill
+     * Create a PDF of the bill
+     * @param purchases the list of purchases to be included in the bill
+     * @param bill the bill object containing details for the PDF
+     * @throws ValidationException if there is an error in validation
      */
-    void createPdfOfBill(List<Purchase> purchases, Long invoiceId, LocalDateTime paidAt, String reservationStartedAt, String servedTables, ApplicationUser user);
-
-    /**
-     * save a bill
-     * @param filename the filename of the bill
-     * @param invoiceId of the bill
-     * @param paidAt the date, at which the bill is paid
-     * @param price the total price of the bill
-     */
-    void saveBill(String filename, Long invoiceId, LocalDateTime paidAt, double price, String reservationStartedAt, String servedTables) throws IOException;
+    void createPdfOfBill(List<Purchase> purchases, Bill bill) throws ValidationException;
 
     /**
      * Get details of all saved bills
