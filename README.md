@@ -97,7 +97,7 @@ This project implements a full-stack restaurant management platform featuring re
 </td> </tr> </table>
 
 ## Business Impact
-- **Faster Deployments**: CI/CD with GitHub Actions cut deployment time by ~25%, accelerating release cycles and reducing system downtime.
+- **Faster Deployments**: CI/CD with GitHub Actions cut deployment time, accelerating release cycles and reducing system downtime.
 
 - **Reduced Manual Overhead**: Automated invoicing and reservation handling reduced administrative workload, freeing staff to focus on customer service.
 
