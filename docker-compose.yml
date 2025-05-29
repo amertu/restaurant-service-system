@@ -32,40 +32,40 @@ services:
       - spring_network
 
   postgres:
-      image: postgres:15.2
-      container_name: postgres-restaurant
-      environment:
-        POSTGRES_DB: ${POSTGRES_DB}
-        POSTGRES_USER: ${POSTGRES_USER}
-        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-        JDBC_URL: ${JDBC_URL}
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
-      ports:
-        - "${POSTGRES_PORT}:${POSTGRES_PORT}"
-      networks:
-        - spring_network
-      healthcheck:
-        test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
-        interval: 30s
-        retries: 3
-        start_period: 5s
-        timeout: 10s
+    image: postgres:15.2
+    container_name: postgres-restaurant
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      JDBC_URL: ${JDBC_URL}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    networks:
+      - spring_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 30s
+      retries: 3
+      start_period: 5s
+      timeout: 10s
 
-flyway:
-  image: flyway/flyway
-  container_name: flyway_migration
-  environment:
-    FLYWAY_URL: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-    FLYWAY_USER: ${POSTGRES_USER}
-    FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
-  volumes:
-    - ./db/migrations:/flyway/sql
-  depends_on:
-    - postgres
-  networks:
-    - spring_network
-  command: ["migrate"]
+  flyway:
+    image: flyway/flyway
+    container_name: flyway_migration
+    environment:
+      FLYWAY_URL: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      FLYWAY_USER: ${POSTGRES_USER}
+      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./db/migrations:/flyway/sql
+    depends_on:
+      - postgres
+    networks:
+      - spring_network
+    command: ["migrate"]
 
 volumes:
   postgres_data: {}
