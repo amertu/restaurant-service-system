@@ -67,11 +67,12 @@ Actions.
 
 ## Architecture
 
-<table> <tr> 
-<td style="vertical-align:top;"> 
-<pre style="margin: 0;"> 
-Application Architecture (Runtime) 
-──────────────────────────────────
+<table>
+    <tr>
+        <td valign="top">
+<pre style="margin: 0;">
+Application Architecture (Runtime)
+───────────────────────────────
   [Developer]
        │
        ▼
@@ -99,9 +100,10 @@ Application Architecture (Runtime)
        ▼
  [PostgreSQL DB]
 </pre>
-</td> <td style="vertical-align:top;"> 
-<pre style="margin: 0;"> 
-   Development & Deployment Pipeline
+        </td>
+        <td valign="top">
+<pre style="margin: 0;">
+Development & Deployment Pipeline
 ────────────────────────────────────────
 [Developer]
     │
@@ -123,8 +125,8 @@ next               ▼
           +------------------------+
           |                        |
           ▼                        ▼
-[Azure Static Web Apps]    [Azure App Service]
-   (frontend files)        (backend container)
+[Azure Static Web Apps]      [Azure App Service]
+   (frontend files)          (backend container)
                                    │
                                    ▼
                             [Config: Env Vars]
@@ -136,7 +138,9 @@ next               ▼
                                    ▼
                            [Azure Blob Storage]
 </pre>
-</td> </tr> </table>
+        </td>
+    </tr>
+</table>
 
 ## Business Impact
 
