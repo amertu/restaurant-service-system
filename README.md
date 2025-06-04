@@ -31,23 +31,23 @@ Actions.
 
 ## Architecture
 
-<table> <tr> <td style="vertical-align:top; padding-right:30px;"> <pre> 🎯 Application Architecture (Runtime) 
+<table> <tr> <td style="vertical-align:top; padding-right:30px;"> <pre> Application Architecture (Runtime) 
 ────────────────────────────────────────
-[👩‍💻 Developer]
+  [Developer]
        │
        ▼
-[📁 GitHub Repo]
+  [GitHub Repo]
        |
        ▼
-[👩‍💻 Client Layer]
+  [ Client Layer]
   ├─ Angular Frontend
   └─ Bootstrap UI
        │
        ▼
-[🚪 API Gateway]
+  [API Gateway]
        │
        ▼
-[🛠️ Services Layer]   now        next
+  [Services Layer]   now        next
   ├─ Reservation     ──────────────────>
   ├─ Layout Management 
   ├─ Invoicing
@@ -55,26 +55,26 @@ Actions.
   └─ User Management
        │
        ▼
-[📚 Shared Persistence Layer]
+[Shared Persistence Layer]
        │
        ▼
-[🗄️ PostgreSQL DB]] 
+ [PostgreSQL DB]
 </pre>
-</td> <td style="vertical-align:top;"> <pre> 🚀 Development & Deployment Pipeline
+</td> <td style="vertical-align:top;"> <pre> Development & Deployment Pipeline
 ────────────────────────────────────────
-[👩‍💻 Developer]
+[Developer]
     │
     ▼
-[📁 GitHub Repo]
+[GitHub Repo]
 (frontend + backend + infra + migrations)
     │
     ▼  (Push / PR triggers)
-[⚙️ GitHub Actions CI/CD]
+    [GitHub Actions CI/CD]
     ├─ Build frontend assets
     ├─ Build backend app
     ├─ Run tests
     ├─ Build Docker images
-    └─ Push images → [🗄️ Azure Container Registry]
+    └─ Push images → [Azure Container Registry]
                    │
                    ▼
           +------------------------+
@@ -82,18 +82,18 @@ Actions.
           +------------------------+
           |                        |
           ▼                        ▼
-[🌐 Azure Static Web Apps]   [🖥️ Azure App Service]
-(frontend files)             (backend container)
+[Azure Static Web Apps]      [Azure App Service]
+   (frontend files)          (backend container)
                              │
                              ▼
-                     [🔐 Config: Env Vars]
+                      [Config: Env Vars]
                              │
                              ▼
-                    [🗄️ Azure PostgreSQL DB]
+                      [Azure PostgreSQL DB]
                     (Managed, secure connection)
                              │
                              ▼
-                     [🗄️ Azure Blob Storage]
+                     [Azure Blob Storage]
 </pre>
 </td> </tr> </table>
 
