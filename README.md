@@ -141,20 +141,3 @@ next               ▼
         </td>
     </tr>
 </table>
-
-## Business Impact
-
-- **Faster Deployments**: CI/CD with GitHub Actions cut deployment time, accelerating release cycles and reducing system
-  downtime.
-
-- **Reduced Manual Overhead**: Automated invoicing and reservation handling reduced administrative workload, freeing
-  staff to focus on customer service.
-
-- **Increased Operational Efficiency**: Real-time processing and optimized reservation logic improved table utilization
-  and reduced order handling latency.
-
-- **Improved Developer Productivity**: Modular architecture and CI/CD pipeline reduced time-to-integrate and made the
-  system easier to extend and maintain.
-
-- **Enhanced Customer Satisfaction**: Intuitive UI and responsive system performance led to quicker check-ins, smoother
-  workflows, and fewer booking conflicts.
