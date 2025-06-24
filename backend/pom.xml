@@ -18,7 +18,7 @@
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
         <spring.boot.version>3.4.5</spring.boot.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <postgre.version>42.7.5</postgre.version>
+        <postgre.version>42.7.7</postgre.version>
         <h2.version>2.3.232</h2.version>
         <openapi.version>1.8.0</openapi.version>
         <openpdf.version>2.0.3</openpdf.version>
